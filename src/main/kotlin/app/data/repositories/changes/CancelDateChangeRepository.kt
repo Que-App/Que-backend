@@ -8,5 +8,5 @@ import java.util.*
 interface CancelDateChangeRepository : BaseChangeRepository<CancelDateChangeEntity>, CrudRepository<CancelDateChangeEntity, UUID> {
 
     @Query("SELECT * FROM cancel_date_changes WHERE lessonid = :lessonId", nativeQuery = true)
-    override fun getChangesForLesson(lessonId: String): Iterable<CancelDateChangeEntity>
+    override fun findChangesForLesson(lessonId: String): Iterable<CancelDateChangeEntity>
 }

@@ -8,9 +8,9 @@ import app.data.repositories.changes.CancelDateChangeRepository
 import app.data.repositories.changes.DateChangeRepository
 import engine.util.OccurrenceTransaction
 import engine.filter.Filter
-import engine.filter.chain.TransactionFilterChain
+import engine.filter.chain.OccurrenceTransactionFilterChain
 import engine.filter.exceptions.UnrecognizedChangeTypeException
-import engine.util.Transaction
+import engine.filter.manager.OccurrenceTransactionFilterManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -24,10 +24,25 @@ class ChangeService {
     @Autowired
     lateinit var cancelDateChangeRepository: CancelDateChangeRepository
 
-    private fun getChangesForLesson(lessonid: UUID): List<BaseChangeEntity> = LinkedList<BaseChangeEntity>().apply {
-        addAll(dateChangeRepository.findAll().filter { it.lessonid == lessonid })
-        addAll(cancelDateChangeRepository.getChangesForLesson(lessonid.toString()))
-    }
+    fun getDateChanges(lessonid: UUID) = dateChangeRepository
+        .findChangesForLesson(lessonid.toString())
+        .toList()
+
+    fun getCancelDateChanges(lessonid: UUID) = cancelDateChangeRepository
+        .findChangesForLesson(lessonid.toString())
+        .toList()
+
+    fun createFilterManager(lessonid: UUID): OccurrenceTransactionFilterManager =
+        OccurrenceTransactionFilterManager(listOf(
+            OccurrenceTransactionFilterChain(getDateChanges(lessonid).map { compile(it) }),
+            OccurrenceTransactionFilterChain(getCancelDateChanges(lessonid).map { compile(it) })
+            ))
+
+    fun createMockupFilterManager(lessonid: UUID): OccurrenceTransactionFilterManager =
+        OccurrenceTransactionFilterManager(listOf(
+            OccurrenceTransactionFilterChain(getDateChanges(lessonid).map { mockCompile(it) }),
+            OccurrenceTransactionFilterChain(getCancelDateChanges(lessonid).map { mockCompile(it) })
+        ))
 
 
     private fun onChangeApplied(changeEntity: BaseChangeEntity): Unit = when (changeEntity) {
@@ -36,47 +51,36 @@ class ChangeService {
         else -> throw UnrecognizedChangeTypeException("Unrecognized change type: ${changeEntity::class}")
     }
 
-    private fun <T : BaseChangeEntity> mockCompile(change: T): (Transaction<OccurrenceEntity>) -> Unit = when(change) {
-        is DateChangeEntity -> { t: Transaction<OccurrenceEntity> ->
+    private fun <T : BaseChangeEntity> mockCompile(change: T): Filter<OccurrenceTransaction> = when(change) {
+        is DateChangeEntity -> Filter { t: OccurrenceTransaction ->
             if(t.data.date == change.date && t.data.lessonid == change.lessonid) {
                 t.data.userid = change.user
             }
         }
 
-        is CancelDateChangeEntity -> { t: Transaction<OccurrenceEntity> ->
+        is CancelDateChangeEntity -> Filter { t: OccurrenceTransaction ->
             if(t.data.lessonid == change.lessonid && t.data.date == change.date) {
-                (t as OccurrenceTransaction).dateTransaction.commit()
+                t.dateTransaction.commit()
                 t.abort()
             }
         }
         else -> throw UnrecognizedChangeTypeException("Unrecognized change type: ${change::class.qualifiedName}")
     }
 
-    private fun <T : BaseChangeEntity> compile(change: T): (Transaction<OccurrenceEntity>) -> Unit {
+    private fun <T : BaseChangeEntity> compile(change: T): Filter<OccurrenceTransaction> {
             val mockFun = mockCompile(change)
-        return { mockFun.invoke(it); it.onCommit { onChangeApplied(change) } }
+        return Filter { mockFun.filter(it); it.onCommit { onChangeApplied(change) } }
     }
 
     fun apply(transaction: OccurrenceTransaction): OccurrenceTransaction {
-        TransactionFilterChain(
-            getChangesForLesson(transaction.data.lessonid)
-                .map { c -> Filter<Transaction<OccurrenceEntity>> {
-                    compile(c).invoke(it) }
-                }
-        ).filter(transaction)
-
+        createFilterManager(transaction.data.lessonid).filter(transaction)
         return transaction
     }
 
     fun mockApply(transaction: OccurrenceTransaction): OccurrenceTransaction {
-        TransactionFilterChain(
-            getChangesForLesson(transaction.data.lessonid)
-                .map { c -> Filter<Transaction<OccurrenceEntity>> {
-                    mockCompile(c).invoke(it) }
-                }
-        ).filter(transaction)
-
+        createMockupFilterManager(transaction.data.lessonid).filter(transaction)
         return transaction
     }
-
 }
+
+

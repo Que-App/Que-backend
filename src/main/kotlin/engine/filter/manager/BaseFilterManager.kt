@@ -2,9 +2,8 @@ package engine.filter.manager
 
 import engine.filter.Filter
 import engine.filter.chain.BaseFilterChain
-import engine.util.Transaction
 
-class BaseFilterManager<T>(chains: List<BaseFilterChain<T>>): Filter<T> {
+open class BaseFilterManager<in T>(chains: List<BaseFilterChain<T>>): Filter<T> {
 
     val iterator: Iterator<BaseFilterChain<T>> = chains.iterator()
 

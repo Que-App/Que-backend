@@ -7,5 +7,5 @@ import java.util.*
 
 interface BaseChangeRepository<T : BaseChangeEntity> {
 
-    fun getChangesForLesson(lessonId: String): Iterable<T>
+    fun findChangesForLesson(lessonId: String): Iterable<T>
 }
