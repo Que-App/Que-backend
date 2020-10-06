@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 @Autowired
 lateinit var userService: UserService
 
-fun SubjectEntity.mapToPojo() = SubjectPojo(name, teacher)
+fun SubjectEntity.mapToPojo() = SubjectPojo(id.toString(), name, teacher)
 
 fun List<SubjectEntity>.mapToSubjectPojos() = map { it.mapToPojo() }
 
