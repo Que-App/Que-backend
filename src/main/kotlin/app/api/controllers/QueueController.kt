@@ -36,13 +36,23 @@ class QueueController {
     //Queue
     @RequestMapping("/queue/{lessonid}/{amount}", method = [RequestMethod.GET])
     fun getQueue(@PathVariable lessonid: UUID, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
-        val occurrence = getOccurrence(lessonid)
-        if(occurrence.data.date.before(Date.valueOf(LocalDate.now()))) occurrence.commit()
+        commitPast(lessonid)
 
         return peekOccurrence(lessonid, amount).map {
             val userdata = userService.getUserData(it.userid)
             OccurrencePojo(it.lessonid, it.userid, it.date, userdata.first, userdata.second)
         }
+    }
+
+    private final tailrec fun commitPast(lessonid: UUID) {
+        val occurrence = getOccurrence(lessonid)
+
+        var contiune = false
+
+        occurrence.onCommit { contiune = true }
+        if(occurrence.data.date.before(Date.valueOf(LocalDate.now()))) occurrence.commit()
+
+        if(contiune) commitPast(lessonid)
     }
 
     private final tailrec fun getOccurrence(lessonId: UUID): OccurrenceTransaction {
