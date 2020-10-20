@@ -1,6 +1,7 @@
 package app.api.controllers
 
 import app.api.pojos.SubjectPojo
+import app.api.pojos.mapToPojo
 import app.api.pojos.mapToSubjectPojos
 import app.data.entities.SubjectEntity
 import app.services.SubjectService
@@ -17,6 +18,10 @@ class SubjectController {
 
     @RequestMapping("/subject", method = [RequestMethod.GET])
     fun findSubjects(): List<SubjectPojo> = subjectService.findAllSubjects().mapToSubjectPojos()
+
+    @RequestMapping("/subject/{subjectid}")
+    fun findSubjectById(@PathVariable("subjectid") id: UUID): SubjectPojo =
+        subjectService.findSubject(id).mapToPojo()
 
     @RequestMapping("/subject", method = [RequestMethod.POST])
     fun saveSubject(@RequestBody subjectPojo: SubjectPojo) =
