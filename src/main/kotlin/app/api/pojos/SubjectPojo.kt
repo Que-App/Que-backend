@@ -1,7 +1,7 @@
 package app.api.pojos
 
 class SubjectPojo(
-    val id: String,
+    val id: Int,
 
     val name: String,
 

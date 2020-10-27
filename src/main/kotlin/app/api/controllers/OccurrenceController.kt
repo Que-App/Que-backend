@@ -16,7 +16,7 @@ class OccurrenceController {
     @Autowired
     lateinit var occurrenceService: OccurrenceService
 
-    @RequestMapping("/occurrences/{amount}")
-    fun getOccurrences(@PathVariable("amount") amount: Int): List<OccurrencePojo> =
-        occurrenceService.findPrevious(amount).mapToOccurrencePojos()
+    @RequestMapping("/occurrences/{lessonid}/{amount}")
+    fun getOccurrences(@PathVariable("lessonid") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
+        occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos()
 }

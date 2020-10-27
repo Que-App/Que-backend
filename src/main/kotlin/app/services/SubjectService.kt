@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import java.util.*
 
 @Service
 class SubjectService {
@@ -16,7 +15,7 @@ class SubjectService {
 
     fun findAllSubjects(): List<SubjectEntity> = subjectRepository.findAll().toList()
 
-    fun findSubject(id: UUID): SubjectEntity = subjectRepository.findById(id).orElseThrow {
+    fun findSubject(id: Int): SubjectEntity = subjectRepository.findById(id).orElseThrow {
         ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found")
     }
 
@@ -24,7 +23,6 @@ class SubjectService {
 
     fun deleteSubject(subjectEntity: SubjectEntity) = subjectRepository.delete(subjectEntity)
 
-    fun deleteSubject(id: UUID) = subjectRepository.deleteById(id)
-
+    fun deleteSubject(id: Int) = subjectRepository.deleteById(id)
 
 }

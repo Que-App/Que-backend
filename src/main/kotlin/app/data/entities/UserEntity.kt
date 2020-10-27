@@ -1,7 +1,5 @@
 package app.data.entities
 
-import org.hibernate.annotations.Type
-import java.util.*
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -12,11 +10,13 @@ import javax.persistence.Table
 class UserEntity(
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @Type(type = "uuid-char")
-    var id: UUID,
+    @GeneratedValue
+    var id: Int,
 
-    var name: String,
+    var username: String,
 
-    var surname: String
+    var password: String,
+
+    var enabled: Boolean,
+
 )

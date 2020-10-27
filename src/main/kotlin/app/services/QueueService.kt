@@ -1,34 +1,37 @@
 package app.services
 
-import app.data.entities.QueueEntity
-import app.data.repositories.QueueRepository
 import engine.core.Queue
 import engine.util.Transaction
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
-import java.util.*
 
 @Service
 class QueueService {
 
     @Autowired
-    lateinit var queueRepository: QueueRepository
+    lateinit var lessonService: LessonService
 
-    fun saveQueue(queueEntity: QueueEntity) = queueRepository.save(queueEntity)
-
-    fun peekQueue(lessonId: UUID, amount: Int): List<Transaction<UUID>> = queueRepository.findById(lessonId)
-        .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found.") }
+    fun peekQueue(lessonId: Int, amount: Int): List<Transaction<Int>> = lessonService.findLesson(lessonId)
         .run { Queue(this) }
         .peek(amount)
         .map { Transaction(it) {} }
 
-    fun getFromQueue(lessonId: UUID): Transaction<UUID> =
-        queueRepository.findById(lessonId)
-            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found") }
+    fun peekQueueIterator(lessonId: Int): Iterator<Transaction<Int>> =
+        lessonService.findLesson(lessonId)
             .run { Queue(this) }
-            .run { get().onCommit { queueRepository.save( getEntity() ) } }
+            .peekIterator()
+            .run { TransactionIntWrapperIterator(this) }
+
+    fun getFromQueue(lessonId: Int): Transaction<Int> =
+        lessonService.findLesson(lessonId)
+            .run { Queue(this) }
+            .run { get().onCommit { lessonService.saveLesson( entity ) } }
+
+    private class TransactionIntWrapperIterator(private val iterator: Iterator<Int>) : Iterator<Transaction<Int>> {
+        override fun hasNext(): Boolean = true
+
+        override fun next(): Transaction<Int> = Transaction(iterator.next()) {}
+    }
 
 
 }

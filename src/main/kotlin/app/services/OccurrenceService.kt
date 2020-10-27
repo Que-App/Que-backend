@@ -17,7 +17,7 @@ class OccurrenceService {
     fun findAllOccurrences() =
         occurrenceRepository.findAll()
 
-    fun findPrevious(amount: Int): List<OccurrenceEntity> =
-        occurrenceRepository.findPrevious(amount)
+    fun findPrevious(lessonId: Int, amount: Int): List<OccurrenceEntity> =
+        occurrenceRepository.findPrevious(lessonId, amount)
 
 }

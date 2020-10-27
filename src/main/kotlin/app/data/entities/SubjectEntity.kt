@@ -1,7 +1,5 @@
 package app.data.entities
 
-import org.hibernate.annotations.Type
-import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -9,10 +7,9 @@ import javax.persistence.*
 class SubjectEntity(
 
     @Id
-    @GeneratedValue(generator = "UUID")
     @Column(name = "id")
-    @Type(type = "uuid-char")
-    var id: UUID,
+    @GeneratedValue
+    var id: Int,
 
     var name: String,
 

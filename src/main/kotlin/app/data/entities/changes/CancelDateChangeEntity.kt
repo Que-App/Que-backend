@@ -1,8 +1,6 @@
 package app.data.entities.changes
 
-import org.hibernate.annotations.Type
 import java.sql.Date
-import java.util.*
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -13,12 +11,10 @@ import javax.persistence.Table
 class CancelDateChangeEntity(
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @Type(type = "uuid-char")
-    override var id: UUID,
+    @GeneratedValue
+    override var id: Int,
 
-    @Type(type = "uuid-char")
-    override var lessonid: UUID,
+    override var lessonid: Int?,
 
     var date: Date,
 ) : BaseChangeEntity

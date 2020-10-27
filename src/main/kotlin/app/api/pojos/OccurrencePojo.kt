@@ -1,17 +1,17 @@
 package app.api.pojos
 
 import java.sql.Date
-import java.util.*
 
 class OccurrencePojo(
-    val lessonid: UUID,
+    val lessonid: Int?,
 
-    val userid: UUID,
+    val userid: Int?,
+
+    val lessonindex: Int,
 
     val date: Date,
 
-    val name: String,
+    val username: String,
 
-    val surname: String,
 )
 

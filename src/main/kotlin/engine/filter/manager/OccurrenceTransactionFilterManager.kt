@@ -1,6 +1,5 @@
 package engine.filter.manager
 
-import engine.filter.chain.BaseFilterChain
 import engine.filter.chain.OccurrenceTransactionFilterChain
 import engine.util.OccurrenceTransaction
 

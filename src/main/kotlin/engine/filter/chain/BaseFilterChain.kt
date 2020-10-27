@@ -1,8 +1,6 @@
 package engine.filter.chain
 
 import engine.filter.Filter
-import engine.util.Transaction
-import java.util.*
 
 open class BaseFilterChain<in T>(filters: List<Filter<T>>) : Filter<T> {
 

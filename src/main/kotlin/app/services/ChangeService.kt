@@ -1,19 +1,17 @@
 package app.services
 
-import app.data.entities.OccurrenceEntity
 import app.data.entities.changes.BaseChangeEntity
 import app.data.entities.changes.CancelDateChangeEntity
 import app.data.entities.changes.DateChangeEntity
 import app.data.repositories.changes.CancelDateChangeRepository
 import app.data.repositories.changes.DateChangeRepository
-import engine.util.OccurrenceTransaction
 import engine.filter.Filter
 import engine.filter.chain.OccurrenceTransactionFilterChain
 import engine.filter.exceptions.UnrecognizedChangeTypeException
 import engine.filter.manager.OccurrenceTransactionFilterManager
+import engine.util.OccurrenceTransaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class ChangeService {
@@ -24,21 +22,21 @@ class ChangeService {
     @Autowired
     lateinit var cancelDateChangeRepository: CancelDateChangeRepository
 
-    fun getDateChanges(lessonid: UUID) = dateChangeRepository
+    fun getDateChanges(lessonid: Int) = dateChangeRepository
         .findChangesForLesson(lessonid.toString())
         .toList()
 
-    fun getCancelDateChanges(lessonid: UUID) = cancelDateChangeRepository
+    fun getCancelDateChanges(lessonid: Int) = cancelDateChangeRepository
         .findChangesForLesson(lessonid.toString())
         .toList()
 
-    fun createFilterManager(lessonid: UUID): OccurrenceTransactionFilterManager =
+    fun createFilterManager(lessonid: Int): OccurrenceTransactionFilterManager =
         OccurrenceTransactionFilterManager(listOf(
             OccurrenceTransactionFilterChain(getDateChanges(lessonid).map { compile(it) }),
             OccurrenceTransactionFilterChain(getCancelDateChanges(lessonid).map { compile(it) })
             ))
 
-    fun createMockupFilterManager(lessonid: UUID): OccurrenceTransactionFilterManager =
+    fun createMockupFilterManager(lessonid: Int): OccurrenceTransactionFilterManager =
         OccurrenceTransactionFilterManager(listOf(
             OccurrenceTransactionFilterChain(getDateChanges(lessonid).map { mockCompile(it) }),
             OccurrenceTransactionFilterChain(getCancelDateChanges(lessonid).map { mockCompile(it) })
@@ -54,7 +52,7 @@ class ChangeService {
     private fun <T : BaseChangeEntity> mockCompile(change: T): Filter<OccurrenceTransaction> = when(change) {
         is DateChangeEntity -> Filter { t: OccurrenceTransaction ->
             if(t.data.date == change.date && t.data.lessonid == change.lessonid) {
-                t.data.userid = change.user
+                t.data.userid = change.userid
             }
         }
 
@@ -73,12 +71,14 @@ class ChangeService {
     }
 
     fun apply(transaction: OccurrenceTransaction): OccurrenceTransaction {
-        createFilterManager(transaction.data.lessonid).filter(transaction)
+        createFilterManager(transaction.data.lessonid?: throw NullPointerException("Attempted to apply changes to occurrence which lesson was removed."))
+            .filter(transaction)
         return transaction
     }
 
     fun mockApply(transaction: OccurrenceTransaction): OccurrenceTransaction {
-        createMockupFilterManager(transaction.data.lessonid).filter(transaction)
+        createMockupFilterManager(transaction.data.lessonid?: throw NullPointerException("Attempted to apply changes to occurrence which lesson was removed."))
+            .filter(transaction)
         return transaction
     }
 }

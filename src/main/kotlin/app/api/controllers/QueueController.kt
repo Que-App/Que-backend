@@ -3,8 +3,8 @@ package app.api.controllers
 import app.api.pojos.OccurrencePojo
 import app.data.entities.OccurrenceEntity
 import app.services.*
-import engine.util.OccurrenceTransaction
 import engine.core.Lesson
+import engine.util.OccurrenceTransaction
 import engine.util.Transaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -35,16 +35,16 @@ class QueueController {
 
     //Queue
     @RequestMapping("/queue/{lessonid}/{amount}", method = [RequestMethod.GET])
-    fun getQueue(@PathVariable lessonid: UUID, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
+    fun getQueue(@PathVariable lessonid: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
         commitPast(lessonid)
 
         return peekOccurrence(lessonid, amount).map {
-            val userdata = userService.getUserData(it.userid)
-            OccurrencePojo(it.lessonid, it.userid, it.date, userdata.first, userdata.second)
+            val userPojo = userService.findUser(it.userid!!)
+            OccurrencePojo(it.lessonid, it.userid, it.lessonindex, it.date, userPojo.username)
         }
     }
 
-    private final tailrec fun commitPast(lessonid: UUID) {
+    private final tailrec fun commitPast(lessonid: Int) {
         val occurrence = getOccurrence(lessonid)
 
         var contiune = false
@@ -55,35 +55,31 @@ class QueueController {
         if(contiune) commitPast(lessonid)
     }
 
-    private final tailrec fun getOccurrence(lessonId: UUID): OccurrenceTransaction {
-        val user: Transaction<UUID> = queueService.getFromQueue(lessonId)
+    private final tailrec fun getOccurrence(lessonId: Int): OccurrenceTransaction {
+        val user: Transaction<Int> = queueService.getFromQueue(lessonId)
 
         val dateToLesson: Pair<Transaction<Date>, Lesson> = lessonService.nextDate(lessonId)
 
-        val occurrence: OccurrenceTransaction =  OccurrenceTransaction(
-            dateToLesson.second.id,
-            dateToLesson.second.lessonindex,
-            dateToLesson.first,
-            user,
-        ).onCommit { occurrenceService.saveOccurrence(it) } as OccurrenceTransaction
+        val occurrence: OccurrenceTransaction =  OccurrenceTransaction(lessonId, dateToLesson.second.entity.lessonindex, dateToLesson.first, user)
+            .onCommit { occurrenceService.saveOccurrence(it) } as OccurrenceTransaction
 
         changeService.apply(occurrence)
 
         return if (!occurrence.aborted) occurrence else getOccurrence(lessonId)
     }
 
-    private final tailrec fun peekOccurrence(lessonId: UUID, amount: Int,
+    private final tailrec fun peekOccurrence(lessonId: Int, amount: Int,
                                              acc: LinkedList<OccurrenceEntity> = LinkedList(),
-                                             users: Iterator<Transaction<UUID>> = queueService.peekQueue(lessonId, amount).iterator(),
+                                             users: Iterator<Transaction<Int>> = queueService.peekQueueIterator(lessonId),
                                              dates: Iterator<Pair<Transaction<Date>, Lesson>> = lessonService.peekNextDates(lessonId))
             : List<OccurrenceEntity> {
 
-        val user: Transaction<UUID> = users.next()
+        val user: Transaction<Int> = users.next()
         val dateToLesson: Pair<Transaction<Date>, Lesson> = dates.next()
 
         val occurrence: OccurrenceTransaction =  OccurrenceTransaction(
-            dateToLesson.second.id,
-            dateToLesson.second.lessonindex,
+            dateToLesson.second.entity.id,
+            dateToLesson.second.entity.lessonindex,
             dateToLesson.first,
             user,
         )
