@@ -17,10 +17,10 @@ import org.springframework.stereotype.Service
 class ChangeService {
 
     @Autowired
-    lateinit var dateChangeRepository: DateChangeRepository
+    private lateinit var dateChangeRepository: DateChangeRepository
 
     @Autowired
-    lateinit var cancelDateChangeRepository: CancelDateChangeRepository
+    private lateinit var cancelDateChangeRepository: CancelDateChangeRepository
 
     fun getDateChanges(lessonid: Int) = dateChangeRepository
         .findChangesForLesson(lessonid.toString())

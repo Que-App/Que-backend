@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException
 class SubjectService {
 
     @Autowired
-    lateinit var subjectRepository: SubjectRepository
+    private lateinit var subjectRepository: SubjectRepository
 
     fun findAllSubjects(): List<SubjectEntity> = subjectRepository.findAll().toList()
 

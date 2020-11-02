@@ -15,7 +15,7 @@ import java.util.*
 class SubjectController {
 
     @Autowired
-    lateinit var subjectService: SubjectService
+    private lateinit var subjectService: SubjectService
 
     @RequestMapping("/subject", method = [RequestMethod.GET])
     fun findSubjects(): List<SubjectPojo> = subjectService.findAllSubjects().mapToSubjectPojos()

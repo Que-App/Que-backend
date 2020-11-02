@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 class UserService {
 
     @Autowired
-    lateinit var userRepository: UserRepository
+    private lateinit var userRepository: UserRepository
 
     fun findUser(id: Int): UserPojo =
         userRepository.findById(id)

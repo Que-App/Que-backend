@@ -18,16 +18,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     @Value("\${queue.api.auth.url}")
-    lateinit var authUrl: String
+    private lateinit var authUrl: String
 
     @Autowired
-    lateinit var jwtConf: JWTConfiguration
+    private lateinit var jwtConf: JWTConfiguration
 
     @Autowired
-    lateinit var authEntryPoint: AuthEntryPointJwt
+    private lateinit var authEntryPoint: AuthEntryPointJwt
 
     @Autowired
-    lateinit var queueUsersService: QueueUsersService
+    private lateinit var queueUsersService: QueueUsersService
 
     override fun configure(auth: AuthenticationManagerBuilder?) {
         auth?.userDetailsService(queueUsersService)

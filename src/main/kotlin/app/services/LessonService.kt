@@ -14,7 +14,7 @@ import java.sql.Date
 class LessonService {
 
     @Autowired
-    lateinit var lessonRepository: LessonRepository
+    private lateinit var lessonRepository: LessonRepository
 
     fun findAllLessons(): List<LessonEntity> = lessonRepository.findAll().toList()
 

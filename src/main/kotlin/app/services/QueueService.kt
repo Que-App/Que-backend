@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class QueueService {
 
     @Autowired
-    lateinit var lessonService: LessonService
+    private lateinit var lessonService: LessonService
 
     fun peekQueue(lessonId: Int, amount: Int): List<Transaction<Int>> = lessonService.findLesson(lessonId)
         .run { Queue(this) }

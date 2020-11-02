@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 class OccurrenceController {
 
     @Autowired
-    lateinit var occurrenceService: OccurrenceService
+    private lateinit var occurrenceService: OccurrenceService
 
     @RequestMapping("/occurrences/{lessonid}/{amount}")
     fun getOccurrences(@PathVariable("lessonid") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =

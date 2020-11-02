@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 class QueueUsersService : UserDetailsService  {
 
     @Autowired
-    lateinit var userRepository: UserRepository
+    private lateinit var userRepository: UserRepository
 
     override fun loadUserByUsername(username: String?): QueueUser =
         userRepository

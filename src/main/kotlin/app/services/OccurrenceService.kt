@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class OccurrenceService {
 
     @Autowired
-    lateinit var occurrenceRepository: OccurrenceRepository
+    private lateinit var occurrenceRepository: OccurrenceRepository
 
     fun saveOccurrence(occurrence: OccurrenceEntity) =
         occurrenceRepository.save(occurrence)

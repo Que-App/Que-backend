@@ -17,10 +17,10 @@ import org.springframework.web.server.ResponseStatusException
 class LessonController {
 
     @Autowired
-    lateinit var subjectService: SubjectService
+    private lateinit var subjectService: SubjectService
 
     @Autowired
-    lateinit var lessonService: LessonService
+    private lateinit var lessonService: LessonService
 
     @RequestMapping("/lesson/{lessonid}")
     fun findLessonById(@PathVariable("lessonid") lessonid: Int): LessonPojo =

@@ -17,19 +17,19 @@ import java.util.*
 class QueueController {
 
     @Autowired
-    lateinit var lessonService: LessonService
+    private lateinit var lessonService: LessonService
 
     @Autowired
-    lateinit var queueService: QueueService
+    private lateinit var queueService: QueueService
 
     @Autowired
-    lateinit var changeService: ChangeService
+    private lateinit var changeService: ChangeService
 
     @Autowired
-    lateinit var userService: UserService
+    private lateinit var userService: UserService
 
     @Autowired
-    lateinit var occurrenceService: OccurrenceService
+    private lateinit var occurrenceService: OccurrenceService
 
 
 
