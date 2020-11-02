@@ -1,5 +1,6 @@
 package app.api.controllers
 
+import app.api.MappingComponent
 import app.api.pojos.OccurrencePojo
 import app.api.pojos.mapToOccurrencePojos
 import app.services.OccurrenceService
@@ -16,7 +17,10 @@ class OccurrenceController {
     @Autowired
     private lateinit var occurrenceService: OccurrenceService
 
+    @Autowired
+    private lateinit var mappingComponent: MappingComponent
+
     @RequestMapping("/occurrences/{lessonid}/{amount}")
     fun getOccurrences(@PathVariable("lessonid") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
-        occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos()
+        occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos(mappingComponent)
 }
