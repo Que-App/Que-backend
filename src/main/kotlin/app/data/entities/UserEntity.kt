@@ -1,9 +1,6 @@
 package app.data.entities
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "users")
@@ -18,5 +15,10 @@ class UserEntity(
     var password: String,
 
     var enabled: Boolean,
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "roles", joinColumns = [JoinColumn(name = "userid")])
+    @Column(name = "role")
+    var roles: Collection<String>
 
 )
