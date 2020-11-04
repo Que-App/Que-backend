@@ -17,21 +17,21 @@ class SubjectController {
     @Autowired
     private lateinit var subjectService: SubjectService
 
-    @RequestMapping("/api/v1/subject", method = [RequestMethod.GET])
+    @GetMapping("/api/v1/subject")
     fun findSubjects(): List<SubjectPojo> = subjectService.findAllSubjects().mapToSubjectPojos()
 
-    @RequestMapping("/api/v1/subject/{subjectid}")
+    @GetMapping("/api/v1/subject/{subjectid}")
     fun findSubjectById(@PathVariable("subjectid") id: Int): SubjectPojo =
         subjectService.findSubject(id).mapToPojo()
 
-    @RequestMapping("/api/v1/subject", method = [RequestMethod.POST])
+    @PostMapping("/api/v1/subject")
     fun saveSubject(@RequestBody subjectPojo: SubjectPojo) =
         subjectService.saveSubject(
             SubjectEntity(0, subjectPojo.name, subjectPojo.teacher, LinkedList())
         )
             .ok()
 
-    @RequestMapping("/api/v1/subject/{subjectid}", method = [RequestMethod.DELETE])
+    @DeleteMapping("/api/v1/subject/{subjectid}")
     fun deleteSubject(@PathVariable("subjectid") id: Int) = subjectService.deleteSubject(id)
         .ok()
 }
