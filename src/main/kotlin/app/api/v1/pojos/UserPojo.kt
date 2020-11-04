@@ -1,4 +1,4 @@
-package app.api.pojos
+package app.api.v1.pojos
 
 class UserPojo(
     val id: Int?,

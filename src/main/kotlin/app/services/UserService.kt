@@ -1,7 +1,7 @@
 package app.services
 
-import app.api.pojos.UserPojo
-import app.api.pojos.mapToPojo
+import app.api.v1.pojos.UserPojo
+import app.api.v1.pojos.mapToPojo
 import app.data.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

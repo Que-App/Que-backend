@@ -1,4 +1,4 @@
-package app.api
+package app.api.v1
 
 import app.services.UserService
 import org.springframework.beans.factory.annotation.Autowired

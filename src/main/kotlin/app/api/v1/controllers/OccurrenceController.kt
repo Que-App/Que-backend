@@ -1,8 +1,8 @@
-package app.api.controllers
+package app.api.v1.controllers
 
-import app.api.MappingComponent
-import app.api.pojos.OccurrencePojo
-import app.api.pojos.mapToOccurrencePojos
+import app.api.v1.MappingComponent
+import app.api.v1.pojos.OccurrencePojo
+import app.api.v1.pojos.mapToOccurrencePojos
 import app.services.OccurrenceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -20,7 +20,7 @@ class OccurrenceController {
     @Autowired
     private lateinit var mappingComponent: MappingComponent
 
-    @RequestMapping("/occurrences/{lessonid}/{amount}")
+    @RequestMapping("/api/v1/occurrences/{lessonid}/{amount}")
     fun getOccurrences(@PathVariable("lessonid") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
         occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos(mappingComponent)
 }

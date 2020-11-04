@@ -1,6 +1,6 @@
-package app.api.pojos
+package app.api.v1.pojos
 
-import app.api.MappingComponent
+import app.api.v1.MappingComponent
 import app.data.entities.LessonEntity
 import app.data.entities.OccurrenceEntity
 import app.data.entities.SubjectEntity

@@ -1,7 +1,7 @@
-package app.api.controllers
+package app.api.v1.controllers
 
-import app.api.request.LoginRequest
-import app.api.response.JwtResponse
+import app.api.v1.request.LoginRequest
+import app.api.v1.response.JwtResponse
 import app.data.repositories.UserRepository
 import app.security.JWTConfiguration
 import app.security.QueueUser
@@ -29,7 +29,7 @@ class LoginController {
     private lateinit var jwtConf: JWTConfiguration
 
 
-    @PostMapping("/auth")
+    @PostMapping("/api/v1/auth")
     fun authenticate(@RequestBody request: LoginRequest): ResponseEntity<JwtResponse> {
 
         val auth: Authentication =

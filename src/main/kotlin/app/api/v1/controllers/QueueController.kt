@@ -1,6 +1,6 @@
-package app.api.controllers
+package app.api.v1.controllers
 
-import app.api.pojos.OccurrencePojo
+import app.api.v1.pojos.OccurrencePojo
 import app.data.entities.OccurrenceEntity
 import app.services.*
 import engine.core.Lesson
@@ -34,7 +34,7 @@ class QueueController {
 
 
     //Queue
-    @RequestMapping("/queue/{lessonid}/{amount}", method = [RequestMethod.GET])
+    @RequestMapping("/api/v1/queue/{lessonid}/{amount}", method = [RequestMethod.GET])
     fun getQueue(@PathVariable lessonid: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
         commitPast(lessonid)
 

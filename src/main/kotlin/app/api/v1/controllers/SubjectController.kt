@@ -1,8 +1,8 @@
-package app.api.controllers
+package app.api.v1.controllers
 
-import app.api.pojos.SubjectPojo
-import app.api.pojos.mapToPojo
-import app.api.pojos.mapToSubjectPojos
+import app.api.v1.pojos.SubjectPojo
+import app.api.v1.pojos.mapToPojo
+import app.api.v1.pojos.mapToSubjectPojos
 import app.data.entities.SubjectEntity
 import app.services.SubjectService
 import lib.returnUnit
@@ -17,21 +17,21 @@ class SubjectController {
     @Autowired
     private lateinit var subjectService: SubjectService
 
-    @RequestMapping("/subject", method = [RequestMethod.GET])
+    @RequestMapping("/api/v1/subject", method = [RequestMethod.GET])
     fun findSubjects(): List<SubjectPojo> = subjectService.findAllSubjects().mapToSubjectPojos()
 
-    @RequestMapping("/subject/{subjectid}")
+    @RequestMapping("/api/v1/subject/{subjectid}")
     fun findSubjectById(@PathVariable("subjectid") id: Int): SubjectPojo =
         subjectService.findSubject(id).mapToPojo()
 
-    @RequestMapping("/subject", method = [RequestMethod.POST])
+    @RequestMapping("/api/v1/subject", method = [RequestMethod.POST])
     fun saveSubject(@RequestBody subjectPojo: SubjectPojo) =
         subjectService.saveSubject(
             SubjectEntity(0, subjectPojo.name, subjectPojo.teacher, LinkedList())
         )
             .returnUnit()
 
-    @RequestMapping("/subject/{subjectid}", method = [RequestMethod.DELETE])
+    @RequestMapping("/api/v1/subject/{subjectid}", method = [RequestMethod.DELETE])
     fun deleteSubject(@PathVariable("subjectid") id: Int) = subjectService.deleteSubject(id)
         .returnUnit()
 }
