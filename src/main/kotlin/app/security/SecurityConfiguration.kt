@@ -2,7 +2,6 @@ package app.security
 
 import app.services.QueueUsersService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -16,9 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @EnableWebSecurity
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
-
-    @Value("\${queue.api.auth.url}")
-    private lateinit var authUrl: String
 
     @Autowired
     private lateinit var jwtConf: JWTConfiguration
@@ -47,7 +43,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         http.exceptionHandling().authenticationEntryPoint(authEntryPoint)
 
         http.authorizeRequests()
-            .antMatchers(authUrl).permitAll()
+            .antMatchers("/api/v1/auth").permitAll()
             .anyRequest().authenticated()
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -20,25 +20,30 @@ repositories {
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3"
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-
-    implementation 'io.jsonwebtoken:jjwt:0.2'
-
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:2.1.2'
+
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     compile 'io.jsonwebtoken:jjwt-api:0.11.1'
     runtime 'io.jsonwebtoken:jjwt-impl:0.11.1'
     runtime 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    implementation 'org.mariadb.jdbc:mariadb-java-client:2.1.2'
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.0"
 
     //tests
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -48,6 +53,9 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'com.h2database:h2'
 
+    configurations {
+        all*.exclude module : 'spring-boot-starter-logging'
+    }
 
 
 }
