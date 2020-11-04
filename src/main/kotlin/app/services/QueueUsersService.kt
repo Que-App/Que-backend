@@ -25,4 +25,6 @@ class QueueUsersService : UserDetailsService  {
         .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "User with specified id not found") }
         .run { QueueUser(this) }
 
+    fun saveUser(user: QueueUser) = userRepository.save(user.userEntity)
+
 }

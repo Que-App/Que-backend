@@ -4,7 +4,7 @@ import app.data.entities.UserEntity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-class QueueUser(private val userEntity: UserEntity) : UserDetails {
+class QueueUser(val userEntity: UserEntity) : UserDetails {
 
     val id: Int = userEntity.id
 
