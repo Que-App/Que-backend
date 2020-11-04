@@ -1,7 +1,9 @@
 package app.api.v1.controllers
 
+import app.api.v1.request.AccountCreationRequest
 import app.api.v1.request.ChangePasswordRequest
 import app.api.v1.response.InvalidPasswordResponse
+import app.data.entities.UserEntity
 import app.security.QueueUser
 import app.services.QueueUsersService
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import util.ok
+import java.util.*
 
 @RestController
 class AccountController {
@@ -38,4 +42,9 @@ class AccountController {
 
         return ResponseEntity.ok().build()
     }
+
+    @PostMapping("/api/v1/account/create")
+    fun crateAccount(@RequestBody req: AccountCreationRequest) =
+        queueUsersService.saveUser(UserEntity(0, req.username, encoder.encode(req.password), true, LinkedList()))
+            .ok()
 }

@@ -6,11 +6,11 @@ import app.api.v1.pojos.mapToPojo
 import app.data.entities.LessonEntity
 import app.services.LessonService
 import app.services.SubjectService
-import lib.returnUnit
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import util.ok
 
 @CrossOrigin
 @RestController
@@ -44,7 +44,7 @@ class LessonController {
         lessonEntities.add(lessonEntity)
         subjectService.saveSubject(this)
     }
-        .returnUnit()
+        .ok()
 
     @RequestMapping("/api/v1/subject/{subjectid}/lesson/{lessonid}", method = [RequestMethod.DELETE])
     fun deleteLessonFromSubject(@PathVariable("subjectid") subjectid: Int, @PathVariable("lessonid") lessonid: Int)
@@ -52,5 +52,5 @@ class LessonController {
         lessonEntities.remove(lessonEntities.first { it.id == lessonid })
         subjectService.saveSubject(this)
     }
-        .returnUnit()
+        .ok()
 }

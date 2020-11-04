@@ -1,5 +1,6 @@
 package app.services
 
+import app.data.entities.UserEntity
 import app.data.repositories.UserRepository
 import app.security.QueueUser
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,5 +27,7 @@ class QueueUsersService : UserDetailsService  {
         .run { QueueUser(this) }
 
     fun saveUser(user: QueueUser) = userRepository.save(user.userEntity)
+
+    fun saveUser(user: UserEntity) = userRepository.save(user)
 
 }

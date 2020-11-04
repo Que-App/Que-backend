@@ -5,9 +5,9 @@ import app.api.v1.pojos.mapToPojo
 import app.api.v1.pojos.mapToSubjectPojos
 import app.data.entities.SubjectEntity
 import app.services.SubjectService
-import lib.returnUnit
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import util.ok
 import java.util.*
 
 @CrossOrigin
@@ -29,11 +29,11 @@ class SubjectController {
         subjectService.saveSubject(
             SubjectEntity(0, subjectPojo.name, subjectPojo.teacher, LinkedList())
         )
-            .returnUnit()
+            .ok()
 
     @RequestMapping("/api/v1/subject/{subjectid}", method = [RequestMethod.DELETE])
     fun deleteSubject(@PathVariable("subjectid") id: Int) = subjectService.deleteSubject(id)
-        .returnUnit()
+        .ok()
 }
 
 
