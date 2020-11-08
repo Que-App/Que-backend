@@ -23,7 +23,7 @@ class QueueUser(val userEntity: UserEntity) : UserDetails {
     override fun isCredentialsNonExpired(): Boolean = true
 
     fun removeCredentials(): QueueUser {
-        userEntity.password = "PROTECTED"
+        userEntity.password = ""
         return this
     }
 }

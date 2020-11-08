@@ -1,6 +1,6 @@
 package app.security
 
-import app.services.QueueUsersService
+import app.services.UserService
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
@@ -18,7 +18,7 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class JWTAuthenticatonFilter(val queueUsersService: QueueUsersService, val jwtConf: JWTConfiguration) : OncePerRequestFilter() {
+class JWTAuthenticatonFilter(val secureUsersService: UserService, val jwtConf: JWTConfiguration) : OncePerRequestFilter() {
 
     companion object {
         private val log: Logger = LogManager.getLogger()
@@ -47,7 +47,7 @@ class JWTAuthenticatonFilter(val queueUsersService: QueueUsersService, val jwtCo
             .subject
             .toInt()
 
-        val user: QueueUser = queueUsersService.findUserById(userid).removeCredentials()
+        val user: QueueUser = secureUsersService.findUserDetailsById(userid).removeCredentials()
 
         if(!user.isEnabled)
             throw DisabledException("User with id ${user.id} failed token authentication due to account being disabled")

@@ -36,7 +36,7 @@ class OccurrenceController {
         occurrenceService.commitPast(lessonid)
 
         occurrenceService.peekOccurrence(lessonid, amount).map {
-            val userPojo = userService.findUser(it.userid!!)
+            val userPojo = userService.findUserById(it.userid!!)
             OccurrencePojo(it.lessonid, it.userid, it.lessonindex, it.date, userPojo.username)
         }
     }

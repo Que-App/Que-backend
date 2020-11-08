@@ -1,6 +1,6 @@
 package app.security
 
-import app.services.QueueUsersService
+import app.services.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.AuthenticationManager
@@ -23,10 +23,10 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     private lateinit var authEntryPoint: AuthEntryPointJwt
 
     @Autowired
-    private lateinit var queueUsersService: QueueUsersService
+    private lateinit var secureUsersService: UserService
 
     override fun configure(auth: AuthenticationManagerBuilder?) {
-        auth?.userDetailsService(queueUsersService)
+        auth?.userDetailsService(secureUsersService)
         super.configure(auth)
     }
 
@@ -38,7 +38,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             .csrf()
             .disable()
 
-        http.addFilterBefore(JWTAuthenticatonFilter(queueUsersService, jwtConf), UsernamePasswordAuthenticationFilter::class.java)
+        http.addFilterBefore(JWTAuthenticatonFilter(secureUsersService, jwtConf), UsernamePasswordAuthenticationFilter::class.java)
 
         http.exceptionHandling().authenticationEntryPoint(authEntryPoint)
 
