@@ -51,7 +51,7 @@ class OccurrenceService {
 
         val dateToLesson: Pair<Transaction<Date>, Lesson> = lessonService.nextDate(lessonId)
 
-        val occurrence: OccurrenceTransaction =  OccurrenceTransaction(lessonId, dateToLesson.second.entity.lessonindex, dateToLesson.first, user)
+        val occurrence: OccurrenceTransaction =  OccurrenceTransaction(lessonId, dateToLesson.second.entity.lessonIndex, dateToLesson.first, user)
             .onCommit { saveOccurrence(it) } as OccurrenceTransaction
 
         changeService.apply(occurrence)
@@ -70,7 +70,7 @@ class OccurrenceService {
 
         val occurrence =  OccurrenceTransaction(
             dateToLesson.second.entity.id,
-            dateToLesson.second.entity.lessonindex,
+            dateToLesson.second.entity.lessonIndex,
             dateToLesson.first,
             user,
         )

@@ -7,7 +7,6 @@ import javax.persistence.*
 class SubjectEntity(
 
     @Id
-    @Column(name = "id")
     @GeneratedValue
     var id: Int,
 
@@ -15,6 +14,6 @@ class SubjectEntity(
 
     var teacher: String,
 
-    @OneToMany(targetEntity = LessonEntity::class, mappedBy = "subjectid")
+    @OneToMany(targetEntity = LessonEntity::class, mappedBy = "subjectId")
     var lessonEntities: MutableList<LessonEntity>
 )

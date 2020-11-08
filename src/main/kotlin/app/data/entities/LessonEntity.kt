@@ -10,25 +10,24 @@ import javax.persistence.*
 open class LessonEntity(
 
     @Id
-    @Column(name = "id")
     @GeneratedValue
     open var id: Int,
 
-    open var lessonindex: Int,
+    open var lessonIndex: Int,
 
-    open var subjectid: Int,
+    open var subjectId: Int,
 
-    open var nextdate: Date,
+    open var nextDate: Date,
 
     open var pointer: Int,
 
     open var time: Time,
 
-    open var recurrenceinterval: Int,
+    open var recurrenceInterval: Int,
 
     @ElementCollection
-    @CollectionTable(name = "queue_users", joinColumns = [JoinColumn(name = "lessonid")])
-    @Column(name = "userid")
+    @CollectionTable(name = "queue_users", joinColumns = [JoinColumn(name = "lesson_id")])
+    @Column(name = "user_id")
     @OrderBy("queue_order")
     open var users: MutableList<Int>,
     )

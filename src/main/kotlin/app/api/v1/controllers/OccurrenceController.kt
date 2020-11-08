@@ -36,8 +36,8 @@ class OccurrenceController {
         occurrenceService.commitPast(lessonid)
 
         occurrenceService.peekOccurrence(lessonid, amount).map {
-            val userPojo = userService.findUserById(it.userid!!)
-            OccurrencePojo(it.lessonid, it.userid, it.lessonindex, it.date, userPojo.username)
+            val userPojo = userService.findUserById(it.userId!!)
+            OccurrencePojo(it.lessonId, it.userId, it.lessonIndex, it.date, userPojo.username)
         }
     }
     catch (e: EmptyQueueException) {

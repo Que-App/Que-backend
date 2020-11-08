@@ -51,13 +51,13 @@ class ChangeService {
 
     private fun <T : BaseChangeEntity> mockCompile(change: T): Filter<OccurrenceTransaction> = when(change) {
         is DateChangeEntity -> Filter { t: OccurrenceTransaction ->
-            if(t.data.date == change.date && t.data.lessonid == change.lessonid) {
-                t.data.userid = change.userid
+            if(t.data.date == change.date && t.data.lessonId == change.lessonid) {
+                t.data.userId = change.userid
             }
         }
 
         is CancelDateChangeEntity -> Filter { t: OccurrenceTransaction ->
-            if(t.data.lessonid == change.lessonid && t.data.date == change.date) {
+            if(t.data.lessonId == change.lessonid && t.data.date == change.date) {
                 t.dateTransaction.commit()
                 t.abort()
             }
@@ -71,13 +71,13 @@ class ChangeService {
     }
 
     fun apply(transaction: OccurrenceTransaction): OccurrenceTransaction {
-        createFilterManager(transaction.data.lessonid?: throw NullPointerException("Attempted to apply changes to occurrence which lesson was removed."))
+        createFilterManager(transaction.data.lessonId?: throw NullPointerException("Attempted to apply changes to occurrence which lesson was removed."))
             .filter(transaction)
         return transaction
     }
 
     fun mockApply(transaction: OccurrenceTransaction): OccurrenceTransaction {
-        createMockupFilterManager(transaction.data.lessonid?: throw NullPointerException("Attempted to apply changes to occurrence which lesson was removed."))
+        createMockupFilterManager(transaction.data.lessonId?: throw NullPointerException("Attempted to apply changes to occurrence which lesson was removed."))
             .filter(transaction)
         return transaction
     }

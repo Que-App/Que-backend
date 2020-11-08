@@ -14,11 +14,11 @@ class OccurrenceEntity(
     @GeneratedValue
     var id: Int,
 
-    var lessonid: Int?,
+    var lessonId: Int?,
 
-    var lessonindex: Int,
+    var lessonIndex: Int,
 
     var date: Date,
 
-    var userid: Int?,
+    var userId: Int?,
 )

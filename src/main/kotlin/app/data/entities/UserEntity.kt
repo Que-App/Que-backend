@@ -17,7 +17,7 @@ class UserEntity(
     var enabled: Boolean,
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "roles", joinColumns = [JoinColumn(name = "userid")])
+    @CollectionTable(name = "roles", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "role")
     var roles: Collection<String>
 

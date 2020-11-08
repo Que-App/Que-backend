@@ -16,13 +16,13 @@ fun UserEntity.mapToPojo() = UserPojo(id, username)
 fun Collection<UserEntity>.mapToUserPojos() = map { it.mapToPojo() }
 
 fun OccurrenceEntity.mapToPojo(component: MappingComponent): OccurrencePojo {
-    val userPojo = userid?.run { component.userService.findUserById(this) } ?: UserPojo(null, "[Removed User]")
-    return OccurrencePojo(lessonid, userid, lessonindex, date, userPojo.username)
+    val userPojo = userId?.run { component.userService.findUserById(this) } ?: UserPojo(null, "[Removed User]")
+    return OccurrencePojo(lessonId, userId, lessonIndex, date, userPojo.username)
 }
 
 fun List<OccurrenceEntity>.mapToOccurrencePojos(component: MappingComponent) = map { it.mapToPojo(component) }
 
-fun LessonEntity.mapToPojo() = LessonPojo(id, lessonindex, subjectid, nextdate, time, recurrenceinterval)
+fun LessonEntity.mapToPojo() = LessonPojo(id, lessonIndex, subjectId, nextDate, time, recurrenceInterval)
 
 fun Collection<LessonEntity>.mapToLessonPojos() = map { it.mapToPojo() }
 

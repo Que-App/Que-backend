@@ -9,21 +9,21 @@ class Lesson(val entity: LessonEntity) {
 
     fun occurrencesUntill(untill: LocalDate): Int {
         var counter: Int = 1
-        var date = entity.nextdate.toLocalDate()
+        var date = entity.nextDate.toLocalDate()
 
-        while(!date.isAfter(untill.minusDays(entity.recurrenceinterval.toLong()))) {
+        while(!date.isAfter(untill.minusDays(entity.recurrenceInterval.toLong()))) {
             counter++
-            date = date.plusDays(entity.recurrenceinterval.toLong())
+            date = date.plusDays(entity.recurrenceInterval.toLong())
         }
         return counter
     }
 
-    fun nextDate(): Transaction<Date> = Transaction(entity.nextdate) {
-        entity.nextdate = Date.valueOf(entity.nextdate.toLocalDate().plusDays(entity.recurrenceinterval.toLong()))
-        entity.lessonindex++
+    fun nextDate(): Transaction<Date> = Transaction(entity.nextDate) {
+        entity.nextDate = Date.valueOf(entity.nextDate.toLocalDate().plusDays(entity.recurrenceInterval.toLong()))
+        entity.lessonIndex++
     }
 
-    fun peekNextDates(): Iterator<Pair<Transaction<Date>, Lesson>> = DateIterator(entity.nextdate, entity.recurrenceinterval, this)
+    fun peekNextDates(): Iterator<Pair<Transaction<Date>, Lesson>> = DateIterator(entity.nextDate, entity.recurrenceInterval, this)
 
     private class DateIterator(var nextDate: Date, var recurrenceinterval: Int, val lesson: Lesson)
         : Iterator<Pair<Transaction<Date>, Lesson>> {
