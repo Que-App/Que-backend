@@ -7,6 +7,7 @@ import engine.util.OccurrenceTransaction
 import engine.util.Transaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import util.repeatApply
 import java.sql.Date
 import java.time.LocalDate
 import java.util.*
@@ -59,30 +60,62 @@ class OccurrenceService {
         return if (!occurrence.aborted) occurrence else getOccurrence(lessonId)
     }
 
-    final tailrec fun peekOccurrence(lessonId: Int, amount: Int,
-                                             acc: LinkedList<OccurrenceEntity> = LinkedList(),
-                                             users: Iterator<Transaction<Int>> = queueService.peekQueueIterator(lessonId),
-                                             dates: Iterator<Pair<Transaction<Date>, Lesson>> = lessonService.peekNextDates(lessonId))
-            : List<OccurrenceEntity> {
+    fun peekOccurrence(
+        lessonId: Int,
+        amount: Int,
+        acc: LinkedList<OccurrenceEntity> = LinkedList(),
+        occurrencesIterator: Iterator<OccurrenceTransaction> = occurrenceIterator(lessonId)
+    ): List<OccurrenceEntity> {
+        val iterator = occurrenceIterator(lessonId)
+        return LinkedList<OccurrenceEntity>().repeatApply(amount) {
+            add(iterator.next().data)
+        }
+    }
+    
+    fun occurrenceIterator(lessonId: Int): Iterator<OccurrenceTransaction> = PeekOccurrenceIterator(
+        queueService.peekQueueIterator(lessonId),
+        lessonService.peekNextDatesIterator(lessonId),
+        changeService
+    )
 
-        val user: Transaction<Int> = users.next()
-        val dateToLesson: Pair<Transaction<Date>, Lesson> = dates.next()
+    private class PeekOccurrenceIterator(
+        private val usersIterator: Iterator<Transaction<Int>>,
+        private val dateIterator: Iterator<Pair<Transaction<Date>, Lesson>>,
+        private val changeService: ChangeService
+    ) : Iterator<OccurrenceTransaction> {
 
-        val occurrence =  OccurrenceTransaction(
-            dateToLesson.second.entity.id,
-            dateToLesson.second.entity.lessonIndex,
-            dateToLesson.first,
-            user,
-        )
+        override fun hasNext(): Boolean = true
 
-        changeService.mockApply(occurrence)
-        occurrence.commit()
+        override fun next(): OccurrenceTransaction = getNext()
 
-        if(!occurrence.aborted) acc.add(occurrence.data)
+        private tailrec fun getNext(): OccurrenceTransaction {
+            val user: Transaction<Int> = usersIterator.next()
+            val dateToLesson: Pair<Transaction<Date>, Lesson> = dateIterator.next()
 
-        return if (acc.size == amount) acc
-        else peekOccurrence(lessonId, amount, acc, users, dates)
+            val occurrence =  OccurrenceTransaction(
+                dateToLesson.second.entity.id,
+                dateToLesson.second.entity.lessonIndex,
+                dateToLesson.first,
+                user,
+            )
 
+            changeService.mockApply(occurrence)
+            occurrence.commit()
+            return if(!occurrence.aborted) occurrence else getNext()
+        }
+    }
+
+    fun doesUserOccur(lessonId: Int, date: Date, user: Int): Boolean {
+        val iterator = occurrenceIterator(lessonId)
+
+        var occurrence = iterator.next()
+
+        while (!occurrence.data.date.toLocalDate().isAfter(date.toLocalDate())) {
+            if(occurrence.data.date == date)
+                return occurrence.data.userId == user
+            occurrence = iterator.next()
+        }
+        return false
     }
 
 }

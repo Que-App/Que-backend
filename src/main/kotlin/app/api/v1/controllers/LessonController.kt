@@ -22,34 +22,34 @@ class LessonController {
     @Autowired
     private lateinit var lessonService: LessonService
 
-    @GetMapping("/api/v1/lesson/{lessonid}")
-    fun findLessonById(@PathVariable("lessonid") lessonid: Int): LessonPojo =
-        lessonService.findLesson(lessonid).mapToPojo()
+    @GetMapping("/api/v1/lesson/{lessonId}")
+    fun findLessonById(@PathVariable("lessonId") lessonId: Int): LessonPojo =
+        lessonService.findLesson(lessonId).mapToPojo()
 
-    @GetMapping("/api/v1/subject/{subjectid}/lesson")
-    fun findLessonsForSubject(@PathVariable("subjectid") id: Int) = subjectService.findSubject(id).lessonEntities.mapToLessonPojos()
+    @GetMapping("/api/v1/subject/{subjectId}/lesson")
+    fun findLessonsForSubject(@PathVariable("subjectId") id: Int) = subjectService.findSubject(id).lessonEntities.mapToLessonPojos()
 
-    @GetMapping("/api/v1/subject/{subjectid}/lesson/{lessonid}")
-    fun findLessonFromSubject(@PathVariable("subjectid") subjectid: Int, @PathVariable("lessonid") lessonid: Int)
-            = subjectService.findSubject(subjectid).lessonEntities.mapToLessonPojos()
-        .find { it.id == lessonid } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found")
+    @GetMapping("/api/v1/subject/{subjectId}/lesson/{lessonId}")
+    fun findLessonFromSubject(@PathVariable("subjectId") subjectId: Int, @PathVariable("lessonId") lessonId: Int)
+            = subjectService.findSubject(subjectId).lessonEntities.mapToLessonPojos()
+        .find { it.id == lessonId } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found")
 
-    @GetMapping("/api/v1/lesson/{lessonid}/user")
-    fun getUsersFromLesson(@PathVariable("subjectid") subjectid: Int, @PathVariable("lessonid") lessonid: Int)
-            = lessonService.findLesson(subjectid).users
+    @GetMapping("/api/v1/lesson/{lessonId}/user")
+    fun getUsersFromLesson(@PathVariable("subjectId") subjectId: Int, @PathVariable("lessonId") lessonId: Int)
+            = lessonService.findLesson(subjectId).users
 
-    @PostMapping("/api/v1/subject/{subjectid}/lesson")
-    fun saveLessonToSubject(@PathVariable("subjectid") id: Int, @RequestBody lessonEntity: LessonEntity)
+    @PostMapping("/api/v1/subject/{subjectId}/lesson")
+    fun saveLessonToSubject(@PathVariable("subjectId") id: Int, @RequestBody lessonEntity: LessonEntity)
             = subjectService.findSubject(id).apply {
         lessonEntities.add(lessonEntity)
         subjectService.saveSubject(this)
     }
         .ok()
 
-    @DeleteMapping("/api/v1/subject/{subjectid}/lesson/{lessonid}")
-    fun deleteLessonFromSubject(@PathVariable("subjectid") subjectid: Int, @PathVariable("lessonid") lessonid: Int)
-            = subjectService.findSubject(subjectid).apply {
-        lessonEntities.remove(lessonEntities.first { it.id == lessonid })
+    @DeleteMapping("/api/v1/subject/{subjectId}/lesson/{lessonId}")
+    fun deleteLessonFromSubject(@PathVariable("subjectId") subjectId: Int, @PathVariable("lessonId") lessonId: Int)
+            = subjectService.findSubject(subjectId).apply {
+        lessonEntities.remove(lessonEntities.first { it.id == lessonId })
         subjectService.saveSubject(this)
     }
         .ok()

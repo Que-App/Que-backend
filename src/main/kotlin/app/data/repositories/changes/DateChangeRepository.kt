@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository
 
 interface DateChangeRepository : BaseChangeRepository<DateChangeEntity>, CrudRepository<DateChangeEntity, Int> {
 
-    @Query("SELECT * FROM date_changes WHERE lessonid = :lessonId", nativeQuery = true)
+    @Query("SELECT * FROM date_changes WHERE lesson_id = :lessonId", nativeQuery = true)
     override fun findChangesForLesson(lessonId: String): Iterable<DateChangeEntity>
 }

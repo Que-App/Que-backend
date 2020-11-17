@@ -36,7 +36,7 @@ class LessonService {
                 lessonRepository.save( entity ) } to this
             }
 
-    fun peekNextDates(lessonId: Int): Iterator<Pair<Transaction<Date>, Lesson>> =
+    fun peekNextDatesIterator(lessonId: Int): Iterator<Pair<Transaction<Date>, Lesson>> =
         lessonRepository.findById(lessonId)
             .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found.") }
             .run { Lesson(this) }

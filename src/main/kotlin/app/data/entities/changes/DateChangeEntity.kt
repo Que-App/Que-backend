@@ -14,9 +14,9 @@ class DateChangeEntity(
     @GeneratedValue
     override var id: Int,
 
-    override var lessonid: Int?,
+    override var lessonId: Int?,
 
     var date: Date,
 
-    var userid: Int?,
+    var userId: Int?,
 ) : BaseChangeEntity

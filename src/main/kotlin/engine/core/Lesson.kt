@@ -31,6 +31,7 @@ class Lesson(val entity: LessonEntity) {
 
         override fun next(): Pair<Transaction<Date>, Lesson> = Transaction(nextDate) {
             nextDate = Date.valueOf(nextDate.toLocalDate().plusDays(recurrenceinterval.toLong()))
+            lesson.entity.lessonIndex++
         } to lesson
     }
 }

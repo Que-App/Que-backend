@@ -38,7 +38,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             .csrf()
             .disable()
 
-        http.addFilterBefore(JWTAuthenticatonFilter(secureUsersService, jwtConf), UsernamePasswordAuthenticationFilter::class.java)
+        http.addFilterBefore(JWTAuthenticationFilter(secureUsersService, jwtConf), UsernamePasswordAuthenticationFilter::class.java)
 
         http.exceptionHandling().authenticationEntryPoint(authEntryPoint)
 

@@ -20,8 +20,8 @@ class SubjectController {
     @GetMapping("/api/v1/subject")
     fun findSubjects(): List<SubjectPojo> = subjectService.findAllSubjects().mapToSubjectPojos()
 
-    @GetMapping("/api/v1/subject/{subjectid}")
-    fun findSubjectById(@PathVariable("subjectid") id: Int): SubjectPojo =
+    @GetMapping("/api/v1/subject/{subjectId}")
+    fun findSubjectById(@PathVariable("subjectId") id: Int): SubjectPojo =
         subjectService.findSubject(id).mapToPojo()
 
     @PostMapping("/api/v1/subject")
@@ -31,8 +31,8 @@ class SubjectController {
         )
             .ok()
 
-    @DeleteMapping("/api/v1/subject/{subjectid}")
-    fun deleteSubject(@PathVariable("subjectid") id: Int) = subjectService.deleteSubject(id)
+    @DeleteMapping("/api/v1/subject/{subjectId}")
+    fun deleteSubject(@PathVariable("subjectId") id: Int) = subjectService.deleteSubject(id)
         .ok()
 }
 

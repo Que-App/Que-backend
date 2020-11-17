@@ -27,15 +27,15 @@ class OccurrenceController {
     @Autowired
     private lateinit var userService: UserService
 
-    @GetMapping("/api/v1/occurrences/past/{lessonid}/{amount}")
-    fun getOccurrences(@PathVariable("lessonid") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
+    @GetMapping("/api/v1/occurrences/past/{lessonId}/{amount}")
+    fun getOccurrences(@PathVariable("lessonId") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
         occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos(mappingComponent)
 
-    @GetMapping("/api/v1/occurrences/next/{lessonid}/{amount}")
-    fun getQueue(@PathVariable lessonid: Int, @PathVariable("amount") amount: Int) = try {
-        occurrenceService.commitPast(lessonid)
+    @GetMapping("/api/v1/occurrences/next/{lessonId}/{amount}")
+    fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int) = try {
+        occurrenceService.commitPast(lessonId)
 
-        occurrenceService.peekOccurrence(lessonid, amount).map {
+        occurrenceService.peekOccurrence(lessonId, amount).map {
             val userPojo = userService.findUserById(it.userId!!)
             OccurrencePojo(it.lessonId, it.userId, it.lessonIndex, it.date, userPojo.username)
         }

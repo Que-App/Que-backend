@@ -18,7 +18,7 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class JWTAuthenticatonFilter(val secureUsersService: UserService, val jwtConf: JWTConfiguration) : OncePerRequestFilter() {
+class JWTAuthenticationFilter(private val secureUsersService: UserService, private val jwtConf: JWTConfiguration) : OncePerRequestFilter() {
 
     companion object {
         private val log: Logger = LogManager.getLogger()

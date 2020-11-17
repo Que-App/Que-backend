@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository
 
 interface CancelDateChangeRepository : BaseChangeRepository<CancelDateChangeEntity>, CrudRepository<CancelDateChangeEntity, Int> {
 
-    @Query("SELECT * FROM cancel_date_changes WHERE lessonid = :lessonId", nativeQuery = true)
+    @Query("SELECT * FROM cancel_date_changes WHERE lesson_id = :lessonId", nativeQuery = true)
     override fun findChangesForLesson(lessonId: String): Iterable<CancelDateChangeEntity>
 }

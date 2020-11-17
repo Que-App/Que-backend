@@ -1,6 +1,5 @@
 package app.services
 
-import app.api.v1.controllers.UserController
 import app.api.v1.pojos.UserPojo
 import app.api.v1.pojos.mapToPojo
 import app.api.v1.response.AuthenticationFailedResponse
@@ -18,9 +17,6 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import util.ok
-import java.sql.SQLException
-import java.sql.SQLIntegrityConstraintViolationException
 import java.util.*
 
 @Service
@@ -35,6 +31,9 @@ class UserService : UserDetailsService  {
 
     @Autowired
     private lateinit var userRepository: UserRepository
+
+    val currentlyAuthenticatedUser: QueueUser
+        get() = SecurityContextHolder.getContext().authentication.principal as QueueUser
 
     private val userNotFoundException
         get() = ResponseStatusException(HttpStatus.NOT_FOUND, "No such user")
@@ -84,6 +83,8 @@ class UserService : UserDetailsService  {
     catch (e: DataIntegrityViolationException) {
         throw ResponseStatusException(HttpStatus.CONFLICT, "User with this username already exists.")
     }
+
+    fun isNowAuthenticated(id: Int): Boolean = currentlyAuthenticatedUser.id == id
 
 
     fun UserEntity.removeCredentials() = apply { password = "" }

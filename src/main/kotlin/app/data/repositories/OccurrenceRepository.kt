@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository
 
 interface OccurrenceRepository : CrudRepository<OccurrenceEntity, Int> {
 
-    @Query("SELECT * FROM occurrence_log where lessonid = :lessonid ORDER BY date DESC LIMIT :amount", nativeQuery = true)
-    fun findPrevious(lessonid: Int, amount: Int): List<OccurrenceEntity>
+    @Query("SELECT * FROM occurrence_log where lesson_id = :lessonId ORDER BY date DESC LIMIT :amount", nativeQuery = true)
+    fun findPrevious(lessonId: Int, amount: Int): List<OccurrenceEntity>
 }

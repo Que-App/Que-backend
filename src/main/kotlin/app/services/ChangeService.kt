@@ -11,7 +11,9 @@ import engine.filter.exceptions.UnrecognizedChangeTypeException
 import engine.filter.manager.OccurrenceTransactionFilterManager
 import engine.util.OccurrenceTransaction
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class ChangeService {
@@ -21,6 +23,21 @@ class ChangeService {
 
     @Autowired
     private lateinit var cancelDateChangeRepository: CancelDateChangeRepository
+
+    fun saveDateChange(change: DateChangeEntity) = dateChangeRepository.save(change)
+
+    fun saveCancelDateChange(change: CancelDateChangeEntity) =
+        cancelDateChangeRepository.save(change)
+
+    fun findDateChangeById(id: Int) =
+        dateChangeRepository
+            .findById(id)
+            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "No such change") }
+
+    fun findCanceldateChangeById(id: Int) =
+        cancelDateChangeRepository
+            .findById(id)
+            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "No such change") }
 
     fun getDateChanges(lessonid: Int) = dateChangeRepository
         .findChangesForLesson(lessonid.toString())
@@ -51,13 +68,13 @@ class ChangeService {
 
     private fun <T : BaseChangeEntity> mockCompile(change: T): Filter<OccurrenceTransaction> = when(change) {
         is DateChangeEntity -> Filter { t: OccurrenceTransaction ->
-            if(t.data.date == change.date && t.data.lessonId == change.lessonid) {
-                t.data.userId = change.userid
+            if(t.data.date == change.date && t.data.lessonId == change.lessonId) {
+                t.data.userId = change.userId
             }
         }
 
         is CancelDateChangeEntity -> Filter { t: OccurrenceTransaction ->
-            if(t.data.lessonId == change.lessonid && t.data.date == change.date) {
+            if(t.data.lessonId == change.lessonId && t.data.date == change.date) {
                 t.dateTransaction.commit()
                 t.abort()
             }
