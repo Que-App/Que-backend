@@ -2,12 +2,11 @@ package app.services
 
 import app.data.entities.LessonEntity
 import app.data.repositories.LessonRepository
+import app.services.exceptions.EntityNotFoundException
 import engine.core.Lesson
 import engine.util.Transaction
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import java.sql.Date
 
 @Service
@@ -18,8 +17,10 @@ class LessonService {
 
     fun findAllLessons(): List<LessonEntity> = lessonRepository.findAll().toList()
 
-    fun findLesson(id: Int): LessonEntity = lessonRepository.findById(id).orElseThrow {
-        ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found")
+    fun findLesson(id: Int): LessonEntity = lessonRepository
+        .findById(id)
+        .orElseThrow {
+        throw EntityNotFoundException("lesson")
     }
 
     fun saveLesson(lessonEntity: LessonEntity) = lessonRepository.save(lessonEntity)
@@ -30,7 +31,7 @@ class LessonService {
 
     fun nextDate(lessonId: Int): Pair<Transaction<Date>, Lesson> =
         lessonRepository.findById(lessonId)
-            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found") }
+            .orElseThrow { throw EntityNotFoundException("lesson") }
             .let { Lesson(it) }
             .run { nextDate().onCommit {
                 lessonRepository.save( entity ) } to this
@@ -38,7 +39,7 @@ class LessonService {
 
     fun peekNextDatesIterator(lessonId: Int): Iterator<Pair<Transaction<Date>, Lesson>> =
         lessonRepository.findById(lessonId)
-            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "Lesson not found.") }
+            .orElseThrow { throw EntityNotFoundException("lesson") }
             .run { Lesson(this) }
             .peekNextDates()
 

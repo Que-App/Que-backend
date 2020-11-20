@@ -6,14 +6,15 @@ import app.data.entities.changes.DateChangeEntity
 import app.data.repositories.ExchangeRequestRepository
 import app.data.repositories.ExchangesRepository
 import app.security.QueueUser
+import app.services.exceptions.EntityNotFoundException
+import app.services.exceptions.InvalidExchangeRequestException
+import app.services.exceptions.UnauthorizedException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import java.sql.Date
 import java.time.LocalDate
 
@@ -50,7 +51,7 @@ class ExchangeService {
     fun findRequestById(id: Int) =
         exchangeRequestRepository
             .findById(id)
-            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "No such request") }
+            .orElseThrow { throw EntityNotFoundException("exchange request") }
 
     fun findRequestsToUser(): Collection<ExchangeRequestEntity> =
         exchangeRequestRepository.findRequestsToUser(userService.currentlyAuthenticatedUser.id).toList()
@@ -63,7 +64,7 @@ class ExchangeService {
 
         if(userService.currentlyAuthenticatedUser.id != request.toUserId) {
             log.debug("User with id ${userService.currentlyAuthenticatedUser.id} tried to decline request ${ObjectMapper().writeValueAsString(request)}")
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You can only decline request sent to you.")
+            throw UnauthorizedException("You can only decline request sent to you")
         }
 
         log.debug("Request ${ObjectMapper().writeValueAsString(request)} has been declined.")
@@ -80,7 +81,7 @@ class ExchangeService {
 
         if(request.toUserId != userid){
             log.debug("User with id $id tried to accept request ${request.id} which was sent to user ${request.toUserId}")
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Accepting other user's requests is not allowed")
+            throw UnauthorizedException("Accepting other user's requests is not allowed")
         }
 
         validateRequest(request)
@@ -132,7 +133,7 @@ class ExchangeService {
             request.apply {
                 log.debug("Exchange request with id $id was invalid. Error message: $message." + "Request: ${ObjectMapper().writeValueAsString(request)}") }
 
-        throw ResponseStatusException(HttpStatus.CONFLICT, message)
+        throw InvalidExchangeRequestException(message)
     }
 
 }

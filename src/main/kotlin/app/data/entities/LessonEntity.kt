@@ -6,7 +6,6 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "lessons")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 open class LessonEntity(
 
     @Id

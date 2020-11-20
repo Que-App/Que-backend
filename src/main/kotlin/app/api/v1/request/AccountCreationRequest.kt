@@ -1,8 +1,15 @@
 package app.api.v1.request
 
-class AccountCreationRequest {
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Size
 
-    lateinit var username: String
+class AccountCreationRequest (
 
-    lateinit var password: String
-}
+    @field:NotNull(message = "Please specify username")
+    @field:Size(min = 3, max = 30, message = "Username must be between 3 and 30 characters long")
+    val username: String?,
+
+    @field:NotNull(message = "Please specify password")
+    @field:Size(min = 3, max = 30, message = "Password must be between 3 and 30 characters long")
+    val password: String?
+)

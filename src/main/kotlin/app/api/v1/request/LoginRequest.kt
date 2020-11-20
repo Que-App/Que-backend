@@ -1,7 +1,12 @@
 package app.api.v1.request
 
-class LoginRequest {
-    lateinit var username: String
+import javax.validation.constraints.NotNull
 
-    lateinit var password: String
-}
+class LoginRequest(
+
+    @field:NotNull(message = "Please specify username")
+    val username: String?,
+
+    @field:NotNull(message = "Please specify password")
+    val password: String?
+)

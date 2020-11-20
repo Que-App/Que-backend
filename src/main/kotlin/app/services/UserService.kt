@@ -1,11 +1,12 @@
 package app.services
 
 import app.api.v1.pojos.UserPojo
-import app.api.v1.pojos.mapToPojo
-import app.api.v1.response.AuthenticationFailedResponse
+import app.api.v1.pojos.mapping.mapToPojo
 import app.data.entities.UserEntity
 import app.data.repositories.UserRepository
 import app.security.QueueUser
+import app.services.exceptions.EntityNotFoundException
+import app.services.exceptions.UnauthorizedException
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +37,7 @@ class UserService : UserDetailsService  {
         get() = SecurityContextHolder.getContext().authentication.principal as QueueUser
 
     private val userNotFoundException
-        get() = ResponseStatusException(HttpStatus.NOT_FOUND, "No such user")
+        get() = EntityNotFoundException("user")
 
     override fun loadUserByUsername(username: String?): QueueUser =
         userRepository
@@ -66,7 +67,7 @@ class UserService : UserDetailsService  {
 
         if(!encoder.matches(oldPassword, user.password)){
             log.debug("User with id $id attempted failed a password change due to wrong old password")
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(AuthenticationFailedResponse("Wrong password"))
+            throw UnauthorizedException("Invalid old password")
         }
 
         user.userEntity.password = encoder.encode(newPassword)
@@ -81,6 +82,7 @@ class UserService : UserDetailsService  {
         saveUser(UserEntity(0, username, encoder.encode(password), true, LinkedList()))
     }
     catch (e: DataIntegrityViolationException) {
+        //TODO: Remove later when error handling is more complete
         throw ResponseStatusException(HttpStatus.CONFLICT, "User with this username already exists.")
     }
 

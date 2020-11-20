@@ -5,15 +5,14 @@ import app.data.entities.changes.CancelDateChangeEntity
 import app.data.entities.changes.DateChangeEntity
 import app.data.repositories.changes.CancelDateChangeRepository
 import app.data.repositories.changes.DateChangeRepository
+import app.services.exceptions.EntityNotFoundException
 import engine.filter.Filter
 import engine.filter.chain.OccurrenceTransactionFilterChain
 import engine.filter.exceptions.UnrecognizedChangeTypeException
 import engine.filter.manager.OccurrenceTransactionFilterManager
 import engine.util.OccurrenceTransaction
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 
 @Service
 class ChangeService {
@@ -32,12 +31,12 @@ class ChangeService {
     fun findDateChangeById(id: Int) =
         dateChangeRepository
             .findById(id)
-            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "No such change") }
+            .orElseThrow { throw EntityNotFoundException("change") }
 
     fun findCanceldateChangeById(id: Int) =
         cancelDateChangeRepository
             .findById(id)
-            .orElseThrow { throw ResponseStatusException(HttpStatus.NOT_FOUND, "No such change") }
+            .orElseThrow { throw EntityNotFoundException("change") }
 
     fun getDateChanges(lessonid: Int) = dateChangeRepository
         .findChangesForLesson(lessonid.toString())

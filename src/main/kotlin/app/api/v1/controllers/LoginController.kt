@@ -1,9 +1,7 @@
 package app.api.v1.controllers
 
 import app.api.v1.request.LoginRequest
-import app.api.v1.response.AuthenticationFailedResponse
 import app.api.v1.response.TokenResponse
-import app.data.repositories.UserRepository
 import app.security.JWTConfiguration
 import app.security.QueueUser
 import app.security.configure
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import javax.validation.Valid
 
 @CrossOrigin
 @RestController
@@ -28,9 +27,6 @@ class LoginController {
     }
 
     @Autowired
-    private lateinit var  userRepository: UserRepository
-
-    @Autowired
     private lateinit var authenticationManager: AuthenticationManager
 
     @Autowired
@@ -38,7 +34,7 @@ class LoginController {
 
 
     @PostMapping("/api/v1/auth")
-    fun authenticate(@RequestBody request: LoginRequest): ResponseEntity<Any> = try {
+    fun authenticate(@Valid @RequestBody request: LoginRequest): ResponseEntity<Any> = try {
         val auth: Authentication =
             authenticationManager.authenticate(UsernamePasswordAuthenticationToken(request.username, request.password))
 
@@ -52,16 +48,15 @@ class LoginController {
     }
     catch (e: DisabledException) {
         log.debug("User with username ${request.username} failed to obtain a token due to account being disabled")
-        ResponseEntity.badRequest().body(AuthenticationFailedResponse("Account has been disabled. Please contact administrator"))
+        throw e
     }
     catch (e: LockedException) {
         log.debug("User with username ${request.username} failed to obtain a token due to account being locked")
-        ResponseEntity.badRequest().body(AuthenticationFailedResponse("Account has been locked. Please contact administrator"))
+        throw e
     }
     catch (e: BadCredentialsException) {
         log.debug("Attempt of obtaining token with invalid credentials has been made for username ${request.username}")
-        ResponseEntity.badRequest().body(AuthenticationFailedResponse("Invalid username or password."))
+        throw e
     }
-
 
 }

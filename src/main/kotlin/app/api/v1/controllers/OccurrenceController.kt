@@ -2,13 +2,10 @@ package app.api.v1.controllers
 
 import app.api.v1.MappingComponent
 import app.api.v1.pojos.OccurrencePojo
-import app.api.v1.pojos.mapToOccurrencePojos
-import app.api.v1.response.BadRequestResponse
+import app.api.v1.pojos.mapping.mapToOccurrencePojos
 import app.services.OccurrenceService
 import app.services.UserService
-import engine.exceptions.EmptyQueueException
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -32,20 +29,13 @@ class OccurrenceController {
         occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos(mappingComponent)
 
     @GetMapping("/api/v1/occurrences/next/{lessonId}/{amount}")
-    fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int) = try {
+    fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
         occurrenceService.commitPast(lessonId)
 
-        occurrenceService.peekOccurrence(lessonId, amount).map {
+        return occurrenceService.peekOccurrence(lessonId, amount).map {
             val userPojo = userService.findUserById(it.userId!!)
             OccurrencePojo(it.lessonId, it.userId, it.lessonIndex, it.date, userPojo.username)
         }
     }
-    catch (e: EmptyQueueException) {
-        ResponseEntity.badRequest().body(
-            BadRequestResponse.Builder()
-                .cause("There are no users in this queue.")
-                .action("Add at least one user to this queue.")
-                .build()
-        )
-    }
+
 }

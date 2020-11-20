@@ -8,10 +8,12 @@ import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import util.ok
+import javax.validation.Valid
 
 @CrossOrigin
 @RestController
-class UserController {
+class AccountController {
 
     companion object {
         private val log: Logger = LogManager.getLogger()
@@ -21,10 +23,10 @@ class UserController {
     private lateinit var userService: UserService
 
     @PatchMapping("/api/v1/account/changepass")
-    fun changePassword(@RequestBody req: ChangePasswordRequest): ResponseEntity<Any?>
-            = userService.changePassword(req.oldPassword, req.newPassword)
+    fun changePassword(@Valid @RequestBody req: ChangePasswordRequest): ResponseEntity<Any?>
+            = userService.changePassword(req.oldPassword!!, req.newPassword!!).ok()
 
     @PostMapping("/api/v1/account/create")
-    fun crateAccount(@RequestBody req: AccountCreationRequest) =
-        userService.createUser(req.username, req.password)
+    fun crateAccount(@Valid @RequestBody req: AccountCreationRequest) =
+        userService.createUser(req.username!!, req.password!!).ok()
 }
