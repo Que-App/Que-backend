@@ -10,6 +10,7 @@ open class LessonEntity(
 
     @Id
     @GeneratedValue
+    @Column(name = "lesson_id")
     open var id: Int,
 
     open var lessonIndex: Int,

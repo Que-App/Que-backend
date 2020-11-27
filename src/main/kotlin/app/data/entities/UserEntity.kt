@@ -8,6 +8,7 @@ class UserEntity(
 
     @Id
     @GeneratedValue
+    @Column(name = "user_id")
     var id: Int,
 
     var username: String,

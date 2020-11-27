@@ -1,10 +1,7 @@
 package app.data.entities
 
 import java.sql.Date
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "exchange_requests")
@@ -12,6 +9,7 @@ class ExchangeRequestEntity(
 
     @Id
     @GeneratedValue
+    @Column(name = "request_id")
     var id: Int,
 
     var fromUserId: Int,
