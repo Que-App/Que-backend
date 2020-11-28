@@ -18,8 +18,17 @@ class UserEntity(
     var enabled: Boolean,
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "roles", joinColumns = [JoinColumn(name = "user_id")])
-    @Column(name = "role")
-    var roles: Collection<String>
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = [JoinColumn(
+            name = "user_id",
+            referencedColumnName = "user_id"
+        )],
+        inverseJoinColumns = [JoinColumn(
+            name = "role_id",
+            referencedColumnName = "role_id"
+        )]
+    )
+    var roles: Collection<RoleEntity>
 
 )
