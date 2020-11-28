@@ -18,7 +18,7 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class JWTAuthenticationFilter(private val secureUsersService: UserService, private val jwtConf: JWTConfiguration) : OncePerRequestFilter() {
+class JWTAuthenticationFilter(private val usersService: UserService, private val jwtConf: JWTConfiguration) : OncePerRequestFilter() {
 
     companion object {
         private val log: Logger = LogManager.getLogger()
@@ -47,7 +47,7 @@ class JWTAuthenticationFilter(private val secureUsersService: UserService, priva
             .subject
             .toInt()
 
-        val user: QueueUser = secureUsersService.findUserDetailsById(userid).removeCredentials()
+        val user: QueueUser = usersService.findUserDetailsById(userid).removeCredentials()
 
         if(!user.isEnabled)
             throw DisabledException("User with id ${user.id} failed token authentication due to account being disabled")

@@ -8,7 +8,11 @@ class QueueUser(val userEntity: UserEntity) : UserDetails {
 
     val id: Int = userEntity.id
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = userEntity.roles.map { GrantedAuthority { it } }.toMutableList()
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = userEntity
+        .roles
+        .flatMap { it.authorities }
+        .map { GrantedAuthority { it.value } }
+        .toMutableList()
 
     override fun getPassword(): String = userEntity.password
 
