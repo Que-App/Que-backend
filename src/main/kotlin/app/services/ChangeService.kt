@@ -39,11 +39,11 @@ class ChangeService {
             .orElseThrow { throw EntityNotFoundException("change") }
 
     fun getDateChanges(lessonid: Int) = dateChangeRepository
-        .findChangesForLesson(lessonid.toString())
+        .findChangesForLesson(lessonid)
         .toList()
 
     fun getCancelDateChanges(lessonid: Int) = cancelDateChangeRepository
-        .findChangesForLesson(lessonid.toString())
+        .findChangesForLesson(lessonid)
         .toList()
 
     fun createFilterManager(lessonid: Int): OccurrenceTransactionFilterManager =
