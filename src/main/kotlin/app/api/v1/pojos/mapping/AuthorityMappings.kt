@@ -7,6 +7,6 @@ fun AuthorityEntity.mapToPojo() = AuthorityPojo(id, value)
 
 fun Collection<AuthorityEntity>.mapToAuthorityPojos() = map { it.mapToPojo() }
 
-fun AuthorityPojo.mapToEntity() = AuthorityEntity(id, value)
+fun AuthorityPojo.mapToEntity() = AuthorityEntity(id, value!!)
 
 fun Collection<AuthorityPojo>.mapToAuthorityEntities() = map { it.mapToEntity() }

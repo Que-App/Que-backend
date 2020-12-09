@@ -11,5 +11,5 @@ class AuthorityPojo (
 
     @field:NotNull(message = "Value must be specified")
     @Size(min = 3, max = 30, message = "Value size must be between 3 and 30 characters long")
-    var value: String,
+    var value: String?,
 )
