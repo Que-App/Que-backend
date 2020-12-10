@@ -11,6 +11,8 @@ class AuthorityEntity (
     @Column(name = "authority_id")
     var id: Int,
 
-    var value: String
+    var value: String,
+
+    var description: String,
 
 )
