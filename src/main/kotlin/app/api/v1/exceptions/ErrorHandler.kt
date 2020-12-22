@@ -144,6 +144,7 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
             "Access denied: ${ex.message}",
             "If you think this should not happen, please contact the system administrator"
         )
+            .createResponseEntity()
 
     @ExceptionHandler(InvalidExchangeRequestException::class)
     fun handleInvalidExchangeRequest(ex: InvalidExchangeRequestException) =
@@ -152,6 +153,7 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
             "Exchange request was invalid: ${ex.message}. It was removed.",
             "If you believe the request was valid, pleas contact the system administrator as soon as possible"
         )
+            .createResponseEntity()
 
     @ExceptionHandler(Exception::class)
     fun handleGenericException(ex: java.lang.Exception) =
@@ -160,4 +162,5 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
             "We are sorry, something went wrong. This error was logged and will be looked into.",
             "If this issue repeats, please contact the system administrator"
         )
+            .createResponseEntity()
 }
