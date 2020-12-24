@@ -36,7 +36,7 @@ class OccurrenceService {
     fun findPrevious(lessonId: Int, amount: Int): List<OccurrenceEntity> =
         occurrenceRepository.findPrevious(lessonId, amount)
 
-    final tailrec fun commitPast(lessonid: Int) {
+    private final tailrec fun commitPast(lessonid: Int) {
         val occurrence = getOccurrence(lessonid)
 
         var contiune = false
@@ -66,6 +66,8 @@ class OccurrenceService {
         acc: LinkedList<OccurrenceEntity> = LinkedList(),
         occurrencesIterator: Iterator<OccurrenceTransaction> = occurrenceIterator(lessonId)
     ): List<OccurrenceEntity> {
+        commitPast(lessonId)
+
         val iterator = occurrenceIterator(lessonId)
         return LinkedList<OccurrenceEntity>().repeatApply(amount) {
             add(iterator.next().data)

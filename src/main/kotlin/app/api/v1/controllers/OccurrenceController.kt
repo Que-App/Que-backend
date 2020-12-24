@@ -30,7 +30,6 @@ class OccurrenceController {
 
     @GetMapping("/api/v1/occurrences/next/{lessonId}/{amount}")
     fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
-        occurrenceService.commitPast(lessonId)
 
         return occurrenceService.peekOccurrence(lessonId, amount).map {
             val userPojo = userService.findUserById(it.userId!!)
