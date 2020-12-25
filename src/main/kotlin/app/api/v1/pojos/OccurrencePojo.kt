@@ -6,13 +6,13 @@ import javax.validation.constraints.NotNull
 
 class OccurrencePojo(
     @field:Min(0, message = "Lesson id cannot be negative")
-    val lessonid: Int?,
+    val lessonId: Int?,
 
     @field:Min(0, message = "User id cannot be negative")
-    val userid: Int?,
+    val userId: Int?,
 
     @field:Min(0, message = "Lesson index cannot be negative")
-    val lessonindex: Int?,
+    val lessonIndex: Int?,
 
     @field:NotNull(message = "Date must be specified")
     val date: Date?,
@@ -20,5 +20,5 @@ class OccurrencePojo(
     @field:NotNull(message = "Username must be specified")
     val username: String?,
 
-)
+    )
 

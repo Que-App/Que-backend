@@ -23,6 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
+//TODO: Fix this
 @ControllerAdvice
 class ErrorHandler : ResponseEntityExceptionHandler() {
 
