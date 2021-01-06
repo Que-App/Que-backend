@@ -7,7 +7,7 @@ fun ExchangeRequestEntity.mapToPojo() = ExchangeRequestPojo(id, fromUserId, from
 
 fun Collection<ExchangeRequestEntity>.mapToExchangeRequestPojos() = map { it.mapToPojo() }
 
-fun ExchangeRequestPojo.mapToEntity() = ExchangeRequestEntity(id!!, fromUserId!!, fromLessonId!!, fromDate!!, toUserId!!, toLessonId!!, toDate!!)
+fun ExchangeRequestPojo.mapToEntity() = ExchangeRequestEntity(0, fromUserId!!, fromLessonId!!, fromDate!!, toUserId!!, toLessonId!!, toDate!!)
 
 fun Collection<ExchangeRequestPojo>.mapToEntities() = map { it.mapToEntity() }
 

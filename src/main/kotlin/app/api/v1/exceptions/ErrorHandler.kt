@@ -4,6 +4,8 @@ import app.services.exceptions.EntityNotFoundException
 import app.services.exceptions.InvalidExchangeRequestException
 import app.services.exceptions.UnauthorizedException
 import engine.exceptions.EmptyQueueException
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.springframework.beans.TypeMismatchException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -22,10 +24,15 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+import kotlin.math.log
 
 //TODO: Fix this
 @ControllerAdvice
 class ErrorHandler : ResponseEntityExceptionHandler() {
+
+    companion object {
+        val log: Logger = LogManager.getLogger()
+    }
 
     @Autowired
     private lateinit var request: HttpServletRequest
@@ -157,11 +164,14 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
             .createResponseEntity()
 
     @ExceptionHandler(Exception::class)
-    fun handleGenericException(ex: java.lang.Exception) =
-        ApiError(
+    fun handleGenericException(ex: java.lang.Exception): ResponseEntity<Any> {
+        log.error("An unexpected exception has been caught")
+        log.error(ex.stackTraceToString())
+        return ApiError(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "We are sorry, something went wrong. This error was logged and will be looked into.",
             "If this issue repeats, please contact the system administrator"
-        )
-            .createResponseEntity()
+        ).createResponseEntity()
+    }
+
 }

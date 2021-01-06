@@ -8,6 +8,6 @@ fun RoleEntity.mapToPojo() = RolePojo(id, name)
 
 fun Collection<RoleEntity>.mapToRolePojos() = map { it.mapToPojo() }
 
-fun RolePojo.mapToEntity() = RoleEntity(id, name!!, LinkedList())
+fun RolePojo.mapToEntity() = RoleEntity(0, name!!, LinkedList())
 
 fun Collection<RolePojo>.mapToRoleEntities() = map { it.mapToEntity() }
