@@ -5,15 +5,13 @@ import app.data.entities.ExchangeRequestEntity
 import app.data.entities.changes.DateChangeEntity
 import app.data.repositories.ExchangeRequestRepository
 import app.data.repositories.ExchangesRepository
-import app.security.QueueUser
 import app.services.exceptions.EntityNotFoundException
 import app.services.exceptions.InvalidExchangeRequestException
-import app.services.exceptions.UnauthorizedException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import java.sql.Date
 import java.time.LocalDate
@@ -41,6 +39,7 @@ class ExchangeService {
     private lateinit var userService: UserService
 
 
+
     fun findAllExchanges() = exchangeRepository.findAll()
 
     fun findExchangesForUser(id: Int) = exchangeRepository.findChangesForUser(id)
@@ -54,43 +53,37 @@ class ExchangeService {
             .orElseThrow { throw EntityNotFoundException("exchange request") }
 
     fun findRequestsToUser(): Collection<ExchangeRequestEntity> =
-        exchangeRequestRepository.findRequestsToUser(userService.currentlyAuthenticatedUser.id).toList()
+        exchangeRequestRepository.findRequestsToUser(userService.currentlyAuthenticatedUserDetails.id).toList()
 
     fun findRequestByUser(): Collection<ExchangeRequestEntity> =
-        exchangeRequestRepository.findRequestsByUser(userService.currentlyAuthenticatedUser.id).toList()
+        exchangeRequestRepository.findRequestsByUser(userService.currentlyAuthenticatedUserDetails.id).toList()
 
-    fun declineRequest(id: Int) {
-        val request = findRequestById(id)
+    fun declineRequest(id: Int): Unit = declineRequest(findRequestById(id))
 
-        if(userService.currentlyAuthenticatedUser.id != request.toUserId) {
-            log.debug("User with id ${userService.currentlyAuthenticatedUser.id} tried to decline request ${ObjectMapper().writeValueAsString(request)}")
-            throw UnauthorizedException("You can only decline request sent to you")
-        }
-
+    @PreAuthorize("request.toUserId == userService.currentlyAuthenticatedUser.id")
+    fun declineRequest(request: ExchangeRequestEntity): Unit {
         log.debug("Request ${ObjectMapper().writeValueAsString(request)} has been declined.")
-        exchangeRequestRepository.delete(request)
+
+        request.status = ExchangeRequestEntity.Status.DECLINED
+        request.resolvementDate = Date(java.util.Date().time)
+        saveRequest(request)
     }
 
-    fun acceptRequest(id: Int) {
-        val userid: Int = (SecurityContextHolder.getContext().authentication.principal as QueueUser).id
+    fun acceptRequest(id: Int): Unit = acceptRequest(findRequestById(id))
 
-        val request =  try { findRequestById(id) } catch (e: Exception) {
-            log.debug("User with id $id tried to accept not existing request")
-            throw e
-        }
-
-        if(request.toUserId != userid){
-            log.debug("User with id $id tried to accept request ${request.id} which was sent to user ${request.toUserId}")
-            throw UnauthorizedException("Accepting other user's requests is not allowed")
-        }
-
+    @PreAuthorize("request.toUserId == userService.currentlyAuthenticatedUser.id")
+    fun acceptRequest(request: ExchangeRequestEntity): Unit {
         validateRequest(request)
         applyRequest(request)
     }
 
     private fun validateRequest(request: ExchangeRequestEntity) {
+
+        if(request.status != ExchangeRequestEntity.Status.PENDING)
+            handleInvalidRequest(request, "Request had status ${request.status}")
+
         if(request.fromDate.toLocalDate().isBefore(LocalDate.now()) || request.toDate.toLocalDate().isBefore(LocalDate.now()))
-            handleInvalidRequest(request, "Request expired.")
+            handleInvalidRequest(request, "Request expired")
 
         if(!occurrenceService.doesUserOccur(request.fromLessonId, request.fromDate, request.fromUserId))
             handleInvalidRequest(request, "Request author does not occur as specified in request")
@@ -98,7 +91,7 @@ class ExchangeService {
         if(!occurrenceService.doesUserOccur(request.toLessonId, request.toDate, request.toUserId))
             handleInvalidRequest(request, "Request target does not occur as specified in request")
 
-        log.debug("Request ${ObjectMapper().writeValueAsString(request)} passed validation.")
+        log.debug("Request ${ObjectMapper().writeValueAsString(request)} passed validation")
     }
 
     private fun applyRequest(request: ExchangeRequestEntity) {
@@ -110,28 +103,29 @@ class ExchangeService {
         val toDateChange = changeService.saveDateChange(
             DateChangeEntity(0, request.toLessonId, request.toDate, request.fromUserId))
 
-        val exchange = request.run {
-            ExchangeEntity(
-                0,
-                fromUserId,
-                fromLessonId,
-                fromDate,
-                toUserId,
-                toLessonId,
-                toDate,
-                Date.valueOf(LocalDate.now()),
-                fromDateChange.id,
-                toDateChange.id
-            )
-        }
+        val exchange = ExchangeEntity(
+            0,
+            fromDateChange.id,
+            toDateChange.id,
+            request.id
+        )
+
         exchangeRepository.save(exchange)
-        exchangeRequestRepository.delete(request)
+
+        request.status = ExchangeRequestEntity.Status.ACCEPTED
+        request.resolvementDate = Date(java.util.Date().time)
+        saveRequest(request)
     }
 
+    @PreAuthorize("request.toUserId == userService.currentlyAuthenticatedUser.id")
     fun handleInvalidRequest(request: ExchangeRequestEntity, message: String): Nothing {
-        exchangeRequestRepository.delete(request)
             request.apply {
-                log.debug("Exchange request with id $id was invalid. Error message: $message." + "Request: ${ObjectMapper().writeValueAsString(request)}") }
+                log.debug("Exchange request with id $id was invalid. Error message: $message." + "Request: ${ObjectMapper().writeValueAsString(request)}")
+            }
+
+        request.status = ExchangeRequestEntity.Status.INVALID
+        request.resolvementDate = Date(java.util.Date().time)
+        saveRequest(request)
 
         throw InvalidExchangeRequestException(message)
     }

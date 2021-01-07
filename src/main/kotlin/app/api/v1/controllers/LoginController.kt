@@ -3,7 +3,7 @@ package app.api.v1.controllers
 import app.api.v1.request.LoginRequest
 import app.api.v1.response.TokenResponse
 import app.security.JWTConfiguration
-import app.security.QueueUser
+import app.security.QueueUserDetails
 import app.security.configure
 import io.jsonwebtoken.Jwts
 import org.apache.logging.log4j.LogManager
@@ -41,7 +41,7 @@ class LoginController {
         val token = Jwts
             .builder()
             .configure(jwtConf)
-            .setSubject((auth.principal as QueueUser).id.toString())
+            .setSubject((auth.principal as QueueUserDetails).id.toString())
             .compact()
 
         ResponseEntity.ok(TokenResponse(token))

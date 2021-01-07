@@ -47,14 +47,14 @@ class JWTAuthenticationFilter(private val usersService: UserService, private val
             .subject
             .toInt()
 
-        val user: QueueUser = usersService.findUserDetailsById(userid).removeCredentials()
+        val userDetails: QueueUserDetails = usersService.findUserDetailsById(userid).removeCredentials()
 
-        if(!user.isEnabled)
-            throw DisabledException("User with id ${user.id} failed token authentication due to account being disabled")
-        if(!user.isAccountNonLocked)
-            throw LockedException("User with id ${user.id} failed token authentication due to account being locked")
+        if(!userDetails.isEnabled)
+            throw DisabledException("User with id ${userDetails.id} failed token authentication due to account being disabled")
+        if(!userDetails.isAccountNonLocked)
+            throw LockedException("User with id ${userDetails.id} failed token authentication due to account being locked")
 
-        val auth = UsernamePasswordAuthenticationToken(user, null, user.authorities)
+        val auth = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
         auth.details = WebAuthenticationDetailsSource().buildDetails(request)
 
         SecurityContextHolder.getContext().authentication = auth

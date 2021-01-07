@@ -4,7 +4,7 @@ import app.data.entities.UserEntity
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-class QueueUser(val userEntity: UserEntity) : UserDetails {
+class QueueUserDetails(val userEntity: UserEntity) : UserDetails {
 
     val id: Int = userEntity.id
 
@@ -26,7 +26,7 @@ class QueueUser(val userEntity: UserEntity) : UserDetails {
 
     override fun isCredentialsNonExpired(): Boolean = true
 
-    fun removeCredentials(): QueueUser {
+    fun removeCredentials(): QueueUserDetails {
         userEntity.password = ""
         return this
     }

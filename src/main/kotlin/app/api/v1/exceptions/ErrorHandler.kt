@@ -24,9 +24,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.util.*
 import javax.servlet.http.HttpServletRequest
-import kotlin.math.log
 
-//TODO: Fix this
 @ControllerAdvice
 class ErrorHandler : ResponseEntityExceptionHandler() {
 

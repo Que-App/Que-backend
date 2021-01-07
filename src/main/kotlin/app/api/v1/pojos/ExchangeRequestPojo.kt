@@ -1,6 +1,7 @@
 package app.api.v1.pojos
 
 import app.api.v1.validation.FutureDate
+import app.data.entities.ExchangeRequestEntity
 import java.sql.Date
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
@@ -31,4 +32,10 @@ class ExchangeRequestPojo(
 
     @field:FutureDate
     var toDate: Date?,
+
+    @field:NotNull(message = "Request status must not be null")
+    var status: ExchangeRequestEntity.Status? = ExchangeRequestEntity.Status.PENDING,
+
+    var resolvementDate: Date?,
+
 )

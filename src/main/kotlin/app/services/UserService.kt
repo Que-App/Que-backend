@@ -4,7 +4,7 @@ import app.api.v1.pojos.UserPojo
 import app.api.v1.pojos.mapping.mapToPojo
 import app.data.entities.UserEntity
 import app.data.repositories.UserRepository
-import app.security.QueueUser
+import app.security.QueueUserDetails
 import app.services.exceptions.EntityNotFoundException
 import app.services.exceptions.UnauthorizedException
 import org.apache.logging.log4j.LogManager
@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -33,22 +34,22 @@ class UserService : UserDetailsService  {
     @Autowired
     private lateinit var userRepository: UserRepository
 
-    val currentlyAuthenticatedUser: QueueUser
-        get() = SecurityContextHolder.getContext().authentication.principal as QueueUser
+    val currentlyAuthenticatedUserDetails: QueueUserDetails
+        get() = SecurityContextHolder.getContext().authentication.principal as QueueUserDetails
 
     private val userNotFoundException
         get() = EntityNotFoundException("user")
 
-    override fun loadUserByUsername(username: String?): QueueUser =
+    override fun loadUserByUsername(username: String?): QueueUserDetails =
         userRepository
             .findUserByUsername(username!!)
-            .orElseThrow { throw userNotFoundException }
-            .run { QueueUser(this) }
+            .orElseThrow { throw UsernameNotFoundException("User with username $username was not found.") }
+            .run { QueueUserDetails(this) }
 
     fun findUserDetailsById(id: Int) = userRepository
         .findById(id)
         .orElseThrow { throw userNotFoundException }
-        .run { QueueUser(this) }
+        .run { QueueUserDetails(this) }
 
     fun findUserById(id: Int): UserPojo = userRepository
         .findById(id)
@@ -56,23 +57,23 @@ class UserService : UserDetailsService  {
         .removeCredentials()
         .mapToPojo()
 
-    fun saveUser(user: QueueUser) = userRepository.save(user.userEntity)
+    fun saveUser(userDetails: QueueUserDetails) = userRepository.save(userDetails.userEntity)
 
     fun saveUser(user: UserEntity) = userRepository.save(user)
 
     fun changePassword(oldPassword: String, newPassword: String): ResponseEntity<Any?> {
-        val id: Int = (SecurityContextHolder.getContext().authentication.principal as QueueUser).id
+        val id: Int = (SecurityContextHolder.getContext().authentication.principal as QueueUserDetails).id
 
-        val user: QueueUser = findUserDetailsById(id)
+        val userDetails: QueueUserDetails = findUserDetailsById(id)
 
-        if(!encoder.matches(oldPassword, user.password)){
+        if(!encoder.matches(oldPassword, userDetails.password)){
             log.debug("User with id $id attempted failed a password change due to wrong old password")
             throw UnauthorizedException("Invalid old password")
         }
 
-        user.userEntity.password = encoder.encode(newPassword)
+        userDetails.userEntity.password = encoder.encode(newPassword)
 
-        saveUser(user)
+        saveUser(userDetails)
 
         log.debug("User with id $id has successfully changed his password")
         return ResponseEntity.ok().build()
@@ -86,7 +87,7 @@ class UserService : UserDetailsService  {
         throw ResponseStatusException(HttpStatus.CONFLICT, "User with this username already exists.")
     }
 
-    fun isNowAuthenticated(id: Int): Boolean = currentlyAuthenticatedUser.id == id
+    fun isNowAuthenticated(id: Int): Boolean = currentlyAuthenticatedUserDetails.id == id
 
 
     fun UserEntity.removeCredentials() = apply { password = "" }

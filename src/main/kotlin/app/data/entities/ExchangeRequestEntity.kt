@@ -23,4 +23,17 @@ class ExchangeRequestEntity(
     var toLessonId: Int,
 
     var toDate: Date,
-)
+
+    @Enumerated(EnumType.STRING)
+    var status: Status,
+
+    var resolvementDate: Date?,
+
+) {
+    enum class Status {
+        PENDING,
+        ACCEPTED,
+        DECLINED,
+        INVALID
+    }
+}
