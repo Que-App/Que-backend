@@ -1,7 +1,5 @@
 package app.services
 
-import app.api.v1.pojos.UserPojo
-import app.api.v1.pojos.mapping.mapToPojo
 import app.data.entities.UserEntity
 import app.data.repositories.UserRepository
 import app.security.QueueUserDetails
@@ -51,11 +49,10 @@ class UserService : UserDetailsService  {
         .orElseThrow { throw userNotFoundException }
         .run { QueueUserDetails(this) }
 
-    fun findUserById(id: Int): UserPojo = userRepository
+    fun findUserById(id: Int): UserEntity = userRepository
         .findById(id)
         .orElseThrow { throw userNotFoundException }
         .removeCredentials()
-        .mapToPojo()
 
     fun saveUser(userDetails: QueueUserDetails) = userRepository.save(userDetails.userEntity)
 

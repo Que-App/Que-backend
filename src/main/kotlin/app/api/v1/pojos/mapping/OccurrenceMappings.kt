@@ -6,7 +6,7 @@ import app.api.v1.pojos.UserPojo
 import app.data.entities.OccurrenceEntity
 
 fun OccurrenceEntity.mapToPojo(component: MappingComponent): OccurrencePojo {
-    val userPojo = userId?.run { component.userService.findUserById(this) } ?: UserPojo(null, "[Removed User]")
+    val userPojo = userId?.run { component.userService.findUserById(this).mapToPojo() } ?: UserPojo(null, "[Removed User]")
     return OccurrencePojo(lessonId, userId, lessonIndex, date, userPojo.username)
 }
 

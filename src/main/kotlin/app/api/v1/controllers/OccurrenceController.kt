@@ -32,8 +32,8 @@ class OccurrenceController {
     fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
 
         return occurrenceService.peekOccurrence(lessonId, amount).map {
-            val userPojo = userService.findUserById(it.userId!!)
-            OccurrencePojo(it.lessonId, it.userId, it.lessonIndex, it.date, userPojo.username)
+            val userEntity = userService.findUserById(it.userId!!)
+            OccurrencePojo(it.lessonId, it.userId, it.lessonIndex, it.date, userEntity.username)
         }
     }
 
