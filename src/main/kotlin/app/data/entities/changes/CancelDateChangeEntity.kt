@@ -12,7 +12,7 @@ class CancelDateChangeEntity(
     @Column(name = "change_id")
     override var id: Int,
 
-    override var lessonId: Int?,
+    override var lessonId: Int,
 
     var date: Date,
 ) : BaseChangeEntity

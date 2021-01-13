@@ -29,12 +29,12 @@ class OccurrenceController {
         occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos(mappingComponent)
 
     @GetMapping("/api/v1/occurrences/next/{lessonId}/{amount}")
-    fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> {
-
-        return occurrenceService.peekOccurrence(lessonId, amount).map {
-            val userEntity = userService.findUserById(it.userId!!)
-            OccurrencePojo(it.lessonId, it.userId, it.lessonIndex, it.date, userEntity.username)
-        }
-    }
+    fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
+        occurrenceService
+            .peekOccurrences(lessonId)
+            .asSequence()
+            .take(amount)
+            .toList()
+            .mapToOccurrencePojos(mappingComponent)
 
 }

@@ -8,4 +8,7 @@ interface CancelDateChangeRepository : BaseChangeRepository<CancelDateChangeEnti
 
     @Query("SELECT * FROM cancel_date_changes WHERE lesson_id = :lessonId", nativeQuery = true)
     override fun findChangesForLesson(lessonId: Int): Iterable<CancelDateChangeEntity>
+
+    @Query("SELECT * FROM cancel_date_changes WHERE lesson_id = :lessonId", nativeQuery = true)
+    override fun findMostRecentForIndexes(lessonId: Int): Iterable<CancelDateChangeEntity>
 }

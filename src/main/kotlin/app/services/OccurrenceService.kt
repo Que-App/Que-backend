@@ -2,122 +2,131 @@ package app.services
 
 import app.data.entities.OccurrenceEntity
 import app.data.repositories.OccurrenceRepository
-import engine.core.Lesson
-import engine.util.OccurrenceTransaction
+import engine.core.IndexQueue
+import engine.util.DateTransaction
 import engine.util.Transaction
+import engine.util.UserTransaction
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import util.repeatApply
 import java.sql.Date
 import java.time.LocalDate
-import java.util.*
 
 @Service
 class OccurrenceService {
 
     @Autowired
-    private lateinit var occurrenceRepository: OccurrenceRepository
+    private lateinit var dateQueueService: DateQueueService
 
     @Autowired
-    private lateinit var queueService: QueueService
+    private lateinit var userQueueService: UserQueueService
 
     @Autowired
     private lateinit var lessonService: LessonService
 
     @Autowired
-    private lateinit var changeService: ChangeService
+    private lateinit var occurrenceRepository: OccurrenceRepository
 
-    fun saveOccurrence(occurrence: OccurrenceEntity) =
-        occurrenceRepository.save(occurrence)
 
-    fun findAllOccurrences() =
-        occurrenceRepository.findAll()
-
-    fun findPrevious(lessonId: Int, amount: Int): List<OccurrenceEntity> =
-        occurrenceRepository.findPrevious(lessonId, amount)
-
-    private final tailrec fun commitPast(lessonid: Int) {
-        val occurrence = getOccurrence(lessonid)
-
-        var contiune = false
-
-        occurrence.onCommit { contiune = true }
-        if(occurrence.data.date.before(Date.valueOf(LocalDate.now()))) occurrence.commit()
-
-        if(contiune) commitPast(lessonid)
+    companion object {
+        val log: Logger = LogManager.getLogger()
     }
 
-    private final tailrec fun getOccurrence(lessonId: Int): OccurrenceTransaction {
-        val user: Transaction<Int> = queueService.getFromQueue(lessonId)
+    fun findPrevious(lessonId: Int, amount: Int): List<OccurrenceEntity> = occurrenceRepository.findPrevious(lessonId, amount)
 
-        val dateToLesson: Pair<Transaction<Date>, Lesson> = lessonService.nextDate(lessonId)
+    fun getNextOccurrence(lessonId: Int): Transaction<OccurrenceEntity> {
+        val lesson = lessonService.findLesson(lessonId)
 
-        val occurrence: OccurrenceTransaction =  OccurrenceTransaction(lessonId, dateToLesson.second.entity.lessonIndex, dateToLesson.first, user)
-            .onCommit { saveOccurrence(it) } as OccurrenceTransaction
+        val indexTransaction = IndexQueue(lesson).obtain().next()
+        val getIndex = { indexTransaction.data }
 
-        changeService.apply(occurrence)
+        val dateTransaction = dateQueueService.obtain(lesson, getIndex).next()
+        val userTransaction = userQueueService.obtain(lesson, getIndex).next()
 
-        return if (!occurrence.aborted) occurrence else getOccurrence(lessonId)
+        val occurrence = OccurrenceEntity(
+            0,
+            lessonId,
+            getIndex(),
+            Date.valueOf(dateTransaction.data.first),
+            userTransaction.data.first,
+        )
+
+        return Transaction(occurrence) {
+            dateTransaction.commit()
+            userTransaction.commit()
+            indexTransaction.commit()
+
+            lessonService.saveLesson(lesson)
+            occurrenceRepository.save(occurrence)
+        }
+
+
     }
 
-    fun peekOccurrence(
-        lessonId: Int,
-        amount: Int,
-        acc: LinkedList<OccurrenceEntity> = LinkedList(),
-        occurrencesIterator: Iterator<OccurrenceTransaction> = occurrenceIterator(lessonId)
-    ): List<OccurrenceEntity> {
-        commitPast(lessonId)
+    // TODO: We are querying the database twice on each commit, maybe I could optimize it more?
+    // On the other hand, bulk commits will not happen very often, and if they are made
+    // regular they will query the db twice each anyway.
+    private final tailrec fun commitPast(lessonId: Int) {
+        val occurrenceTransaction = getNextOccurrence(lessonId)
 
-        val iterator = occurrenceIterator(lessonId)
-        return LinkedList<OccurrenceEntity>().repeatApply(amount) {
-            add(iterator.next().data)
+        if(!occurrenceTransaction.data.date.toLocalDate().isBefore(LocalDate.now())) return
+        else {
+            occurrenceTransaction.commit()
+            commitPast(lessonId)
         }
     }
-    
-    fun occurrenceIterator(lessonId: Int): Iterator<OccurrenceTransaction> = PeekOccurrenceIterator(
-        queueService.peekQueueIterator(lessonId),
-        lessonService.peekNextDatesIterator(lessonId),
-        changeService
-    )
 
-    private class PeekOccurrenceIterator(
-        private val usersIterator: Iterator<Transaction<Int>>,
-        private val dateIterator: Iterator<Pair<Transaction<Date>, Lesson>>,
-        private val changeService: ChangeService
-    ) : Iterator<OccurrenceTransaction> {
+    fun peekOccurrences(lessonId: Int): Iterator<OccurrenceEntity> {
+        commitPast(lessonId)
+
+        val lesson = lessonService.findLesson(lessonId)
+
+        val indexQueue = IndexQueue(lesson).peek()
+        val getIndex = { indexQueue.next().data }
+
+        return PeekOccurrenceTransactionIterator(
+            dateQueueService.peek(lesson, getIndex),
+            userQueueService.peek(lesson,getIndex),
+            indexQueue,
+            lessonId
+        ).asSequence()
+            .map {
+                it.commit()
+                it.data
+            }
+            .iterator()
+    }
+
+
+    private class PeekOccurrenceTransactionIterator(
+        private val dateIterator: Iterator<DateTransaction>,
+        private val userIterator: Iterator<UserTransaction>,
+        private val indexIterator: Iterator<Transaction<Int>>,
+        private val lessonId: Int,
+    ) : Iterator<Transaction<OccurrenceEntity>> {
 
         override fun hasNext(): Boolean = true
 
-        override fun next(): OccurrenceTransaction = getNext()
+        override fun next(): Transaction<OccurrenceEntity> {
+            val dateTransaction = dateIterator.next()
+            val userTransaction = userIterator.next()
+            val indexTransaction = indexIterator.next()
 
-        private tailrec fun getNext(): OccurrenceTransaction {
-            val user: Transaction<Int> = usersIterator.next()
-            val dateToLesson: Pair<Transaction<Date>, Lesson> = dateIterator.next()
-
-            val occurrence =  OccurrenceTransaction(
-                dateToLesson.second.entity.id,
-                dateToLesson.second.entity.lessonIndex,
-                dateToLesson.first,
-                user,
+            val occurrence = OccurrenceEntity(
+                0,
+                lessonId,
+                indexTransaction.data,
+                Date.valueOf(dateTransaction.data.first),
+                userTransaction.data.first,
             )
 
-            changeService.mockApply(occurrence)
-            occurrence.commit()
-            return if(!occurrence.aborted) occurrence else getNext()
+            return Transaction(occurrence) {
+                dateTransaction.commit()
+                userTransaction.commit()
+                indexTransaction.commit()
+            }
+
         }
     }
-
-    fun doesUserOccur(lessonId: Int, date: Date, user: Int): Boolean {
-        val iterator = occurrenceIterator(lessonId)
-
-        var occurrence = iterator.next()
-
-        while (!occurrence.data.date.toLocalDate().isAfter(date.toLocalDate())) {
-            if(occurrence.data.date == date)
-                return occurrence.data.userId == user
-            occurrence = iterator.next()
-        }
-        return false
-    }
-
 }

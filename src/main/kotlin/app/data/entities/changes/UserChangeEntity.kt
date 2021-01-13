@@ -4,8 +4,8 @@ import java.sql.Date
 import javax.persistence.*
 
 @Entity
-@Table(name = "date_changes")
-class DateChangeEntity(
+@Table(name = "user_changes")
+class UserChangeEntity(
 
     @Id
     @GeneratedValue
@@ -16,7 +16,8 @@ class DateChangeEntity(
 
     var lessonIndex: Int,
 
-    var date: Date,
+    var userId: Int,
 
     var creationTime: Date,
-) : BaseChangeEntity
+
+    ) : BaseChangeEntity
