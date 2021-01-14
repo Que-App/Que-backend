@@ -21,6 +21,9 @@ class UserQueueService {
     @Autowired
     private lateinit var changeRepository: UserChangeRepository
 
+    fun saveUserChange(change: UserChangeEntity) = changeRepository.save(change)
+
+
     private fun compileUserChange(
         change: UserChangeEntity,
         dispose: (UserChangeEntity) -> Unit,

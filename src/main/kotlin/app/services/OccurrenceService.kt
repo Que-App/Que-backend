@@ -98,6 +98,25 @@ class OccurrenceService {
             .iterator()
     }
 
+    fun doesUserOccur(lessonId: Int, index: Int, userId: Int): Boolean {
+        val lesson = lessonService.findLesson(lessonId)
+
+        val indexQueue = IndexQueue(lesson).peek()
+        var currentIndexTransaction = indexQueue.next()
+
+        if(index < currentIndexTransaction.data) return false;
+
+        val userQueue = userQueueService.peek(lesson) { currentIndexTransaction.data }
+
+        while(currentIndexTransaction.data < index) {
+            currentIndexTransaction.commit()
+            currentIndexTransaction = indexQueue.next()
+            userQueue.next().commit()
+        }
+
+        return userQueue.next().data.first == userId
+    }
+
 
     private class PeekOccurrenceTransactionIterator(
         private val dateIterator: Iterator<DateTransaction>,

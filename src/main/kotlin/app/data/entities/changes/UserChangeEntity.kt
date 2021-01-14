@@ -1,6 +1,6 @@
 package app.data.entities.changes
 
-import java.sql.Date
+import java.sql.Timestamp
 import javax.persistence.*
 
 @Entity
@@ -18,6 +18,6 @@ class UserChangeEntity(
 
     var userId: Int,
 
-    var creationTime: Date,
+    var creationTime: Timestamp,
 
     ) : BaseChangeEntity

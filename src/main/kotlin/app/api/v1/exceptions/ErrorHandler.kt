@@ -156,7 +156,7 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
     fun handleInvalidExchangeRequest(ex: InvalidExchangeRequestException) =
         ApiError(
             HttpStatus.CONFLICT,
-            "Exchange request was invalid: ${ex.message}. It was removed.",
+            "Exchange request was invalid: ${ex.message}.",
             "If you believe the request was valid, pleas contact the system administrator as soon as possible"
         )
             .createResponseEntity()

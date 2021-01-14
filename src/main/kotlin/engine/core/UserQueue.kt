@@ -4,7 +4,6 @@ import app.data.entities.LessonEntity
 import engine.exceptions.EmptyQueueException
 import engine.util.Transaction
 import engine.util.UserTransaction
-import java.util.*
 
 class UserQueue(val entity: LessonEntity, private val getIndex: () -> Int): Queue<Pair<Int, Int>> {
 

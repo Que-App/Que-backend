@@ -1,8 +1,7 @@
 package app.api.v1.pojos
 
-import app.api.v1.validation.FutureDate
 import app.data.entities.ExchangeRequestEntity
-import java.sql.Date
+import java.sql.Timestamp
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
 
@@ -19,8 +18,9 @@ class ExchangeRequestPojo(
     @field:Min(0, message = "fromLessonId must be positive")
     var fromLessonId: Int?,
 
-    @field:FutureDate
-    var fromDate: Date?,
+    @field:NotNull(message = "fromIndex must be specified")
+    @field:Min(0, message = "fromIndex must be positive")
+    var fromIndex: Int?,
 
     @field:NotNull(message = "toUserId must be specified")
     @field:Min(0, message = "toUserId must be positive")
@@ -30,12 +30,13 @@ class ExchangeRequestPojo(
     @field:Min(0, message = "toLessonId must be positive")
     var toLessonId: Int?,
 
-    @field:FutureDate
-    var toDate: Date?,
+    @field:NotNull(message = "toIndex must be specified")
+    @field:Min(0, message = "toIndex must be positive")
+    var toIndex: Int?,
 
     @field:NotNull(message = "Request status must not be null")
     var status: ExchangeRequestEntity.Status? = ExchangeRequestEntity.Status.PENDING,
 
-    var resolvementDate: Date?,
+    var resolvementTime: Timestamp?,
 
 )

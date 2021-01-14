@@ -1,6 +1,6 @@
 package app.data.entities
 
-import java.sql.Date
+import java.sql.Timestamp
 import javax.persistence.*
 
 @Entity
@@ -16,18 +16,18 @@ class ExchangeRequestEntity(
 
     var fromLessonId: Int,
 
-    var fromDate: Date,
+    var fromIndex: Int,
 
     var toUserId: Int,
 
     var toLessonId: Int,
 
-    var toDate: Date,
+    var toIndex: Int,
 
     @Enumerated(EnumType.STRING)
     var status: Status,
 
-    var resolvementDate: Date?,
+    var resolvementTime: Timestamp?,
 
 ) {
     enum class Status {

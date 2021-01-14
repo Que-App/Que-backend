@@ -1,6 +1,6 @@
 -- MySQL dump 10.17  Distrib 10.3.25-MariaDB, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: edit
+-- Host: localhost    Database: queue
 -- ------------------------------------------------------
 -- Server version	10.3.25-MariaDB-0ubuntu0.20.04.1
 
@@ -57,13 +57,12 @@ DROP TABLE IF EXISTS `date_changes`;
 CREATE TABLE `date_changes` (
   `change_id` int(11) NOT NULL AUTO_INCREMENT,
   `lesson_id` int(11) NOT NULL,
+  `lesson_index` int(11) NOT NULL,
   `date` date NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `creation_time` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`change_id`),
-  KEY `lessonid_index` (`lesson_id`),
-  KEY `userid_index` (`user_id`),
-  CONSTRAINT `dc_lessonid_to_lessons_id` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`lesson_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `dc_userid_to_users_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `lesson_id_index` (`lesson_id`),
+  CONSTRAINT `lesson_id_to_lessons_lesson_id` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`lesson_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -78,12 +77,12 @@ CREATE TABLE `exchange_requests` (
   `request_id` int(11) NOT NULL AUTO_INCREMENT,
   `from_user_id` int(11) NOT NULL,
   `from_lesson_id` int(11) NOT NULL,
-  `from_date` date NOT NULL,
+  `from_index` int(11) NOT NULL,
   `to_user_id` int(11) NOT NULL,
   `to_lesson_id` int(11) NOT NULL,
-  `to_date` date NOT NULL,
+  `to_index` int(11) NOT NULL,
   `status` enum('PENDING','ACCEPTED','DECLINED','INVALID') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'PENDING',
-  `resolvement_date` date DEFAULT NULL,
+  `resolvement_time` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`request_id`),
   KEY `from_userid_index` (`from_user_id`),
   KEY `from_lessonid_index` (`from_lesson_id`),
@@ -112,9 +111,9 @@ CREATE TABLE `exchanges` (
   KEY `from_change_id_index` (`from_change_id`),
   KEY `to_change_id_index` (`to_change_id`),
   KEY `request_id_index` (`request_id`),
-  CONSTRAINT `ac_from_change_id_to_date_changes_id` FOREIGN KEY (`from_change_id`) REFERENCES `date_changes` (`change_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `ac_to_changeid_to_date_changes_id` FOREIGN KEY (`to_change_id`) REFERENCES `date_changes` (`change_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `exchange_request_id_to_requests_request_id` FOREIGN KEY (`request_id`) REFERENCES `exchange_requests` (`request_id`) ON DELETE SET NULL ON UPDATE CASCADE
+  CONSTRAINT `exchange_request_id_to_requests_request_id` FOREIGN KEY (`request_id`) REFERENCES `exchange_requests` (`request_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `from_change_id_to_user_changes` FOREIGN KEY (`from_change_id`) REFERENCES `user_changes` (`change_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `to_change_id_to_user_changes` FOREIGN KEY (`to_change_id`) REFERENCES `user_changes` (`change_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -225,6 +224,27 @@ CREATE TABLE `subjects` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `user_changes`
+--
+
+DROP TABLE IF EXISTS `user_changes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_changes` (
+  `change_id` int(11) NOT NULL AUTO_INCREMENT,
+  `lesson_id` int(11) NOT NULL,
+  `lesson_index` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `creation_time` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`change_id`),
+  KEY `lesson_id_index` (`lesson_id`),
+  KEY `user_id_index` (`user_id`),
+  CONSTRAINT `lesson_id_to_lessons` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`lesson_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_id_to_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `user_roles`
 --
 
@@ -267,4 +287,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-07 14:26:09
+-- Dump completed on 2021-01-14 23:54:23
