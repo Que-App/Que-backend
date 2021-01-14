@@ -33,9 +33,9 @@ class ExchangeController {
         exchangeService.saveRequest(request.mapToEntity())
             .ok()
 
-    @PatchMapping("/api/v1/exchanges/requests/accept/{requestId}")
+    @GetMapping("/api/v1/exchanges/requests/accept/{requestId}")
     fun acceptRequest(@PathVariable("requestId") id: Int) = exchangeService.acceptRequest(id)
 
-    @PatchMapping("/api/v1/exchanges/requests/decline/{requestId}")
+    @GetMapping("/api/v1/exchanges/requests/decline/{requestId}")
     fun declineRequest(@PathVariable("requestId") id: Int) = exchangeService.declineRequest(id)
 }
