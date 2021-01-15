@@ -36,6 +36,3 @@ class SubjectController {
     fun deleteSubject(@PathVariable("subjectId") id: Int) = subjectService.deleteSubject(id)
         .ok()
 }
-
-
-

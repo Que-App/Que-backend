@@ -1,6 +1,8 @@
 package app.api.v1.pojos
 
 import app.data.entities.ExchangeRequestEntity
+import java.sql.Date
+import java.sql.Time
 import java.sql.Timestamp
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
@@ -38,5 +40,24 @@ class ExchangeRequestPojo(
     var status: ExchangeRequestEntity.Status? = ExchangeRequestEntity.Status.PENDING,
 
     var resolvementTime: Timestamp?,
+
+    var fromUsername: String?,
+
+    var toUsername: String?,
+
+    var fromDate: Date?,
+
+    var toDate: Date?,
+
+    var fromTime: Time?,
+
+    var toTime: Time?,
+
+    var fromSubjectName: String?,
+
+    var toSubjectName: String?,
+
+
+
 
 )

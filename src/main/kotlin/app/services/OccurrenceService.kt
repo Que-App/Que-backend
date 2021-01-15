@@ -117,6 +117,38 @@ class OccurrenceService {
         return userQueue.next().data.first == userId
     }
 
+    fun peekNextDates(lessonId: Int): Iterator<DateTransaction> {
+        val lesson = lessonService.findLesson(lessonId)
+        val indexQueue = IndexQueue(lesson).peek()
+        val dateQueue = dateQueueService.peek(lesson) { indexQueue.next().data }
+
+        return PeekDateTransactionIterator(
+            indexQueue,
+            dateQueue,
+        )
+    }
+
+    fun createIndexToDateMapper(): IndexToDateMapper = CachingIndexToDateMapper()
+
+
+    private class PeekDateTransactionIterator(
+        private val indexIterator: Iterator<Transaction<Int>>,
+        private val dateIterator: Iterator<DateTransaction>,
+    ) : Iterator<DateTransaction> {
+
+        override fun hasNext(): Boolean = true
+
+        override fun next(): DateTransaction {
+            val dateTransaction = dateIterator.next()
+            val indexTransaction = indexIterator.next()
+
+            return Transaction(dateTransaction.data) {
+                dateTransaction.commit()
+                indexTransaction.commit()
+            }
+        }
+    }
+
 
     private class PeekOccurrenceTransactionIterator(
         private val dateIterator: Iterator<DateTransaction>,
@@ -145,6 +177,31 @@ class OccurrenceService {
                 userTransaction.commit()
                 indexTransaction.commit()
             }
+
+        }
+    }
+
+    interface IndexToDateMapper {
+
+        fun mapDate(lessonId: Int, index: Int): LocalDate
+
+    }
+
+    private inner class CachingIndexToDateMapper : IndexToDateMapper {
+
+        private val cache: HashMap<Int, Pair<Iterator<DateTransaction>, MutableList<LocalDate>>> = HashMap()
+
+        override fun mapDate(lessonId: Int, index: Int): LocalDate {
+
+            val cached = cache.computeIfAbsent(lessonId) { peekNextDates(lessonId) to ArrayList() }
+
+            while(cached.second.size < index) {
+                val transaction = cached.first.next()
+                transaction.commit()
+                cached.second.add(transaction.data.first)
+            }
+
+            return cached.second[index-1]
 
         }
     }

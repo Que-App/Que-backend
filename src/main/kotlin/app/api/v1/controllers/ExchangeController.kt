@@ -1,7 +1,9 @@
 package app.api.v1.controllers
 
+import app.api.v1.MappingComponent
 import app.api.v1.pojos.ExchangeRequestPojo
 import app.api.v1.pojos.mapping.mapToEntity
+import app.api.v1.pojos.mapping.mapToExchangeRequestPojos
 import app.services.ExchangeService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -15,6 +17,9 @@ class ExchangeController {
     @Autowired
     private lateinit var exchangeService: ExchangeService
 
+    @Autowired
+    private lateinit var mappingComponent: MappingComponent
+
     @GetMapping("/api/v1/exchanges")
     fun findAllExchanges() = exchangeService.findAllExchanges()
 
@@ -23,10 +28,10 @@ class ExchangeController {
         exchangeService.findExchangesForUser(id)
 
     @GetMapping("/api/v1/exchanges/requests/to")
-    fun getExchangesForUser() = exchangeService.findRequestsToUser()
+    fun getExchangesForUser() = exchangeService.findRequestsToUser().mapToExchangeRequestPojos(mappingComponent)
 
     @GetMapping("/api/v1/exchanges/requests/from")
-    fun getExchangeRequestsByUser() = exchangeService.findRequestByUser()
+    fun getExchangeRequestsByUser() = exchangeService.findRequestByUser().mapToExchangeRequestPojos(mappingComponent)
 
     @PostMapping("/api/v1/exchanges/requests/submit")
     fun submitExchangeRequest(@Valid @RequestBody request: ExchangeRequestPojo) =
