@@ -84,6 +84,8 @@ class ExchangeService {
         if(request.status != ExchangeRequestEntity.Status.PENDING)
             handleInvalidRequest(request, "Request had status ${request.status}")
 
+        if(request.fromUserId == request.toUserId) handleInvalidRequest(request, "You cannot send request to yourself")
+
         val fromLesson = lessonService.findLesson(request.fromLessonId)
         val toLesson = lessonService.findLesson(request.toLessonId)
 
