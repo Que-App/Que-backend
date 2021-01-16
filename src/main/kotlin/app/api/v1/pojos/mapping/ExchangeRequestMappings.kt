@@ -4,6 +4,7 @@ import app.api.v1.MappingComponent
 import app.api.v1.pojos.ExchangeRequestPojo
 import app.data.entities.ExchangeRequestEntity
 import java.sql.Date
+import java.sql.Timestamp
 
 fun Collection<ExchangeRequestEntity>.mapToExchangeRequestPojos(component: MappingComponent): Collection<ExchangeRequestPojo> {
     val indexToDateMapper = component.occurrenceService.createIndexToDateMapper()
@@ -22,7 +23,7 @@ fun Collection<ExchangeRequestEntity>.mapToExchangeRequestPojos(component: Mappi
             it.toLessonId,
             it.toIndex,
             it.status,
-            it.resolvementTime,
+            it.resolvementTime?.time,
             component.userService.findUserById(it.fromUserId).username,
             component.userService.findUserById(it.toUserId).username,
             Date.valueOf(indexToDateMapper.mapDate(it.fromLessonId, it.fromIndex)),
@@ -37,7 +38,7 @@ fun Collection<ExchangeRequestEntity>.mapToExchangeRequestPojos(component: Mappi
 
 fun ExchangeRequestPojo.mapToEntity() = ExchangeRequestEntity(
     0, fromUserId!!, fromLessonId!!, fromIndex!!, toUserId!!, toLessonId!!, toIndex!!,
-    status?: ExchangeRequestEntity.Status.PENDING, resolvementTime,
+    status?: ExchangeRequestEntity.Status.PENDING, null,
 )
 
 fun Collection<ExchangeRequestPojo>.mapToEntities() = map { it.mapToEntity() }

@@ -39,7 +39,7 @@ class ExchangeRequestPojo(
     @field:NotNull(message = "Request status must not be null")
     var status: ExchangeRequestEntity.Status? = ExchangeRequestEntity.Status.PENDING,
 
-    var resolvementTime: Timestamp?,
+    var resolvementTime: Long?,
 
     var fromUsername: String?,
 
