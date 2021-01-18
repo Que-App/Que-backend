@@ -1,15 +1,15 @@
 package app.api.v1.controllers
 
 import app.api.v1.pojos.LessonPojo
-import app.api.v1.pojos.mapping.mapToEntity
 import app.api.v1.pojos.mapping.mapToLessonPojos
 import app.api.v1.pojos.mapping.mapToPojo
 import app.services.LessonService
 import app.services.SubjectService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.*
-import util.ok
-import javax.validation.Valid
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RestController
 
 @CrossOrigin
 @RestController
@@ -32,14 +32,4 @@ class LessonController {
     @GetMapping("/api/v1/lessons/{lessonId}/users")
     fun getUsersFromLesson(@PathVariable("lessonId") lessonId: Int) =
         lessonService.findLesson(lessonId).users
-
-    @PostMapping("/api/v1/lessons")
-    fun saveLesson(@Valid @RequestBody lesson: LessonPojo) =
-        lessonService.saveLesson(lesson.mapToEntity())
-            .ok()
-
-    @DeleteMapping("/api/v1/lessons/{lessonId}")
-    fun deleteLesson(@PathVariable("lessonId") lessonId: Int) =
-        lessonService.deleteLesson(lessonId)
-            .ok()
 }

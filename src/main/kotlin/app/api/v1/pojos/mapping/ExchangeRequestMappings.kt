@@ -4,7 +4,6 @@ import app.api.v1.MappingComponent
 import app.api.v1.pojos.ExchangeRequestPojo
 import app.data.entities.ExchangeRequestEntity
 import java.sql.Date
-import java.sql.Timestamp
 
 fun Collection<ExchangeRequestEntity>.mapToExchangeRequestPojos(component: MappingComponent): Collection<ExchangeRequestPojo> {
     val indexToDateMapper = component.occurrenceService.createIndexToDateMapper()

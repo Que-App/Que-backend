@@ -3,7 +3,6 @@ package app.api.v1.pojos
 import app.data.entities.ExchangeRequestEntity
 import java.sql.Date
 import java.sql.Time
-import java.sql.Timestamp
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
 
