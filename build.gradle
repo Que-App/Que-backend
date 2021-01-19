@@ -59,7 +59,10 @@ dependencies {
         all*.exclude module : 'spring-boot-starter-logging'
     }
 
+}
 
+tasks.bootRun.configure {
+    systemProperty("spring.profiles.active", "dev")
 }
 
 compileKotlin {
