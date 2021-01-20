@@ -25,8 +25,13 @@ class OccurrenceController {
     private lateinit var userService: UserService
 
     @GetMapping("/api/v1/occurrences/past/{lessonId}/{amount}")
-    fun getOccurrences(@PathVariable("lessonId") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
-        occurrenceService.findPrevious(lessonId, amount).mapToOccurrencePojos(mappingComponent)
+    fun getPreviousForLesson(@PathVariable("lessonId") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
+        occurrenceService.findPreviousForLesson(lessonId, amount).mapToOccurrencePojos(mappingComponent)
+
+    @GetMapping("/api/v1/occurrences/past/{amount}")
+    fun getPrevious(@PathVariable("amount") amount: Int) =
+        occurrenceService.findPrevious(amount).mapToOccurrencePojos(mappingComponent)
+
 
     @GetMapping("/api/v1/occurrences/next/{lessonId}/{amount}")
     fun getQueue(@PathVariable lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =

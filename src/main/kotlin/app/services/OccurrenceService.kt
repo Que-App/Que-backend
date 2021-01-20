@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.sql.Date
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class OccurrenceService {
@@ -33,7 +34,9 @@ class OccurrenceService {
         val log: Logger = LogManager.getLogger()
     }
 
-    fun findPrevious(lessonId: Int, amount: Int): List<OccurrenceEntity> = occurrenceRepository.findPrevious(lessonId, amount)
+    fun findPrevious(amount: Int) = occurrenceRepository.findPrevious(amount)
+
+    fun findPreviousForLesson(lessonId: Int, amount: Int): List<OccurrenceEntity> = occurrenceRepository.findPreviousForLesson(lessonId, amount)
 
     fun getNextOccurrence(lessonId: Int): Transaction<OccurrenceEntity> {
         val lesson = lessonService.findLesson(lessonId)
@@ -64,17 +67,14 @@ class OccurrenceService {
 
     }
 
-    // TODO: We are querying the database twice on each commit, maybe I could optimize it more?
-    // On the other hand, bulk commits will not happen very often, and if they are made
-    // regular they will query the db twice each anyway.
     private final tailrec fun commitPast(lessonId: Int) {
         val occurrenceTransaction = getNextOccurrence(lessonId)
+        val lesson = lessonService.findLesson(lessonId)
 
-        if(!occurrenceTransaction.data.date.toLocalDate().isBefore(LocalDate.now())) return
-        else {
-            occurrenceTransaction.commit()
-            commitPast(lessonId)
-        }
+        if(!LocalDateTime.of(occurrenceTransaction.data.date.toLocalDate(), lesson.time.toLocalTime()).isBefore(LocalDateTime.now())) return
+
+        occurrenceTransaction.commit()
+        commitPast(lessonId)
     }
 
     fun peekOccurrences(lessonId: Int): Iterator<OccurrenceEntity> {
