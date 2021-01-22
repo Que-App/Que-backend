@@ -24,6 +24,9 @@ class OccurrenceController {
     @Autowired
     private lateinit var userService: UserService
 
+    @GetMapping("/api/v1/occurrences/update")
+    fun updateOccurrences() = occurrenceService.updateOccurrences()
+
     @GetMapping("/api/v1/occurrences/past/{lessonId}/{amount}")
     fun getPreviousForLesson(@PathVariable("lessonId") lessonId: Int, @PathVariable("amount") amount: Int): List<OccurrencePojo> =
         occurrenceService.findPreviousForLesson(lessonId, amount).mapToOccurrencePojos(mappingComponent)

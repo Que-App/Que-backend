@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import util.localDateTime
 
 
 @Service
@@ -34,7 +35,7 @@ class DateQueueService {
         source
             .asSequence()
             .map {
-                if(it.data.first == change.date.toLocalDate()) {
+                if(it.data.first.toLocalDate() == change.date.toLocalDate() && it.data.first.toLocalTime() == change.time.toLocalTime()) {
                     it.commit()
                     source.next().onCommit { dispose(change) }
                 } else it
@@ -51,7 +52,7 @@ class DateQueueService {
             .map {
                 if(it.data.second == change.lessonIndex) {
                     it.abort()
-                    Transaction(change.date.toLocalDate() to it.data.second) { dispose(change) }
+                    Transaction(localDateTime(change.date, change.time) to it.data.second) { dispose(change) }
                 }
                 else it
             }

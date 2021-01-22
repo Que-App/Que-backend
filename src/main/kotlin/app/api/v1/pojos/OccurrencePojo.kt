@@ -1,6 +1,7 @@
 package app.api.v1.pojos
 
 import java.sql.Date
+import java.sql.Time
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
 
@@ -16,6 +17,9 @@ class OccurrencePojo(
 
     @field:NotNull(message = "Date must be specified")
     val date: Date?,
+
+    @field:NotNull(message = "Time must be specified")
+    val time: Time?,
 
     @field:NotNull(message = "Username must be specified")
     val username: String?,

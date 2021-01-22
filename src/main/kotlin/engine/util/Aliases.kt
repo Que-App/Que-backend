@@ -1,7 +1,7 @@
 package engine.util
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
-typealias DateTransaction = Transaction<Pair<LocalDate, Int>>
+typealias DateTransaction = Transaction<Pair<LocalDateTime, Int>>
 
 typealias UserTransaction = Transaction<Pair<Int, Int>>

@@ -1,6 +1,7 @@
 package app.data.entities.changes
 
 import java.sql.Date
+import java.sql.Time
 import javax.persistence.*
 
 @Entity
@@ -15,4 +16,6 @@ class CancelDateChangeEntity(
     override var lessonId: Int,
 
     var date: Date,
+
+    var time: Time
 ) : BaseChangeEntity

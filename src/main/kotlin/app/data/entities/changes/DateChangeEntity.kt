@@ -1,6 +1,7 @@
 package app.data.entities.changes
 
 import java.sql.Date
+import java.sql.Time
 import javax.persistence.*
 
 @Entity
@@ -17,6 +18,8 @@ class DateChangeEntity(
     var lessonIndex: Int,
 
     var date: Date,
+
+    var time: Time,
 
     var creationTime: Date,
 ) : BaseChangeEntity

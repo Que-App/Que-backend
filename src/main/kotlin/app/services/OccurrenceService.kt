@@ -1,5 +1,6 @@
 package app.services
 
+import app.data.entities.LessonEntity
 import app.data.entities.OccurrenceEntity
 import app.data.repositories.OccurrenceRepository
 import engine.core.IndexQueue
@@ -11,7 +12,7 @@ import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.sql.Date
-import java.time.LocalDate
+import java.sql.Time
 import java.time.LocalDateTime
 
 @Service
@@ -51,7 +52,8 @@ class OccurrenceService {
             0,
             lessonId,
             getIndex(),
-            Date.valueOf(dateTransaction.data.first),
+            Date.valueOf(dateTransaction.data.first.toLocalDate()),
+            Time.valueOf(dateTransaction.data.first.toLocalTime()),
             userTransaction.data.first,
         )
 
@@ -76,6 +78,8 @@ class OccurrenceService {
         occurrenceTransaction.commit()
         commitPast(lessonId)
     }
+
+    fun updateOccurrences() = lessonService.findAllLessons().forEach { commitPast(it.id) }
 
     fun peekOccurrences(lessonId: Int): Iterator<OccurrenceEntity> {
         commitPast(lessonId)
@@ -104,7 +108,7 @@ class OccurrenceService {
         val indexQueue = IndexQueue(lesson).peek()
         var currentIndexTransaction = indexQueue.next()
 
-        if(index < currentIndexTransaction.data) return false;
+        if(index < currentIndexTransaction.data) return false
 
         val userQueue = userQueueService.peek(lesson) { currentIndexTransaction.data }
 
@@ -120,7 +124,7 @@ class OccurrenceService {
     fun peekNextDates(lessonId: Int): Iterator<DateTransaction> {
         val lesson = lessonService.findLesson(lessonId)
         val indexQueue = IndexQueue(lesson).peek()
-        val dateQueue = dateQueueService.peek(lesson) { indexQueue.next().data }
+        val dateQueue: Iterator<DateTransaction> = dateQueueService.peek(lesson) { indexQueue.next().data }
 
         return PeekDateTransactionIterator(
             indexQueue,
@@ -128,7 +132,8 @@ class OccurrenceService {
         )
     }
 
-    fun createIndexToDateMapper(): IndexToDateMapper = CachingIndexToDateMapper()
+    fun createIndexToDateMapper(): IndexToDateTimeMapper = CachingIndexToDateTimeMapper()
+
 
 
     private class PeekDateTransactionIterator(
@@ -168,7 +173,8 @@ class OccurrenceService {
                 0,
                 lessonId,
                 indexTransaction.data,
-                Date.valueOf(dateTransaction.data.first),
+                Date.valueOf(dateTransaction.data.first.toLocalDate()),
+                Time.valueOf(dateTransaction.data.first.toLocalTime()),
                 userTransaction.data.first,
             )
 
@@ -181,17 +187,17 @@ class OccurrenceService {
         }
     }
 
-    interface IndexToDateMapper {
+    interface IndexToDateTimeMapper {
 
-        fun mapDate(lessonId: Int, index: Int): LocalDate
+        fun mapDate(lessonId: Int, index: Int): LocalDateTime
 
     }
 
-    private inner class CachingIndexToDateMapper : IndexToDateMapper {
+    private inner class CachingIndexToDateTimeMapper : IndexToDateTimeMapper {
 
-        private val cache: HashMap<Int, Pair<Iterator<DateTransaction>, MutableList<LocalDate>>> = HashMap()
+        private val cache: HashMap<Int, Pair<Iterator<DateTransaction>, MutableList<LocalDateTime>>> = HashMap()
 
-        override fun mapDate(lessonId: Int, index: Int): LocalDate {
+        override fun mapDate(lessonId: Int, index: Int): LocalDateTime {
 
             val cached = cache.computeIfAbsent(lessonId) { peekNextDates(lessonId) to ArrayList() }
 

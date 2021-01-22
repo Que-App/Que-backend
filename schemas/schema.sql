@@ -41,6 +41,7 @@ CREATE TABLE `cancel_date_changes` (
   `change_id` int(11) NOT NULL AUTO_INCREMENT,
   `lesson_id` int(11) NOT NULL,
   `date` date NOT NULL,
+  `time` time NOT NULL,
   PRIMARY KEY (`change_id`),
   KEY `lessonid_index` (`lesson_id`),
   CONSTRAINT `cdc_lessonid_to_lessons_id` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`lesson_id`)
@@ -59,6 +60,7 @@ CREATE TABLE `date_changes` (
   `lesson_id` int(11) NOT NULL,
   `lesson_index` int(11) NOT NULL,
   `date` date NOT NULL,
+  `time` time NOT NULL,
   `creation_time` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`change_id`),
   KEY `lesson_id_index` (`lesson_id`),
@@ -150,10 +152,12 @@ CREATE TABLE `occurrence_log` (
   `lesson_id` int(11) DEFAULT NULL,
   `lesson_index` int(11) NOT NULL,
   `date` date NOT NULL,
+  `time` time NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`occurrence_id`),
   KEY `lessonid_index` (`lesson_id`),
   KEY `userid_index` (`user_id`),
+  KEY `date_time_index` (`date`,`time`),
   CONSTRAINT `ol_lessonid_to_lessons_id` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`lesson_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `ol_userid_to_users_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -287,4 +291,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-14 23:54:23
+-- Dump completed on 2021-01-22  9:37:07
