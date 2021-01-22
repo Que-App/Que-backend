@@ -4,23 +4,13 @@ import app.data.entities.LessonEntity
 import engine.exceptions.EmptyQueueException
 import engine.util.Transaction
 import engine.util.UserTransaction
+import util.copy
 
 class UserQueue(val entity: LessonEntity, private val getIndex: () -> Int): Queue<Pair<Int, Int>> {
 
     override fun obtain(): Iterator<UserTransaction> = createIterator(entity)
 
-    override fun peek(): Iterator<UserTransaction> = createIterator(
-        LessonEntity(
-        entity.id,
-        entity.lessonIndex,
-        entity.subjectId,
-        entity.nextDate,
-        entity.pointer,
-        entity.time,
-        entity.recurrenceInterval,
-        entity.users,
-    )
-    )
+    override fun peek(): Iterator<UserTransaction> = createIterator(entity.copy())
 
 
     private fun createIterator(entity: LessonEntity): Iterator<UserTransaction> = object : Iterator<UserTransaction> {

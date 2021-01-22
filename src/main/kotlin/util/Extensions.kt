@@ -1,5 +1,6 @@
 package util
 
+import app.data.entities.LessonEntity
 import org.springframework.http.ResponseEntity
 import java.sql.Date
 import java.sql.Time
@@ -22,4 +23,6 @@ fun <T> T.repeatApply(amount: Int, action: T.(Int) -> Unit): T {
 }
 
 fun localDateTime(date: Date, time: Time) = LocalDateTime.of(date.toLocalDate(), time.toLocalTime())
+
+fun LessonEntity.copy() = LessonEntity(id, lessonIndex, subjectId, nextDate, pointer, time, recurrenceInterval, users)
 

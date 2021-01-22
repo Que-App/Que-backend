@@ -1,6 +1,5 @@
 package app.services
 
-import app.data.entities.LessonEntity
 import app.data.entities.OccurrenceEntity
 import app.data.repositories.OccurrenceRepository
 import engine.core.IndexQueue
@@ -11,9 +10,17 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import util.copy
 import java.sql.Date
 import java.sql.Time
 import java.time.LocalDateTime
+
+/* Note that every function that assembles an occurrence sequence does so on a copy of the lesson entity
+* regardless of whether or not is it a peek or an obtain, so as to commits (changes to entities) done in one stream,
+* do not affect the state of the entity used by another stream, which might happen because Spring cache returns the
+* reference to the same object instead of a new instance with same data. An example of that might be a UserChange that
+* commits the current user transaction in order to replace it with the new one in the commitPast function, that is
+* invoked from within the peekOccurrences function. */
 
 @Service
 class OccurrenceService {
@@ -40,7 +47,7 @@ class OccurrenceService {
     fun findPreviousForLesson(lessonId: Int, amount: Int): List<OccurrenceEntity> = occurrenceRepository.findPreviousForLesson(lessonId, amount)
 
     fun getNextOccurrence(lessonId: Int): Transaction<OccurrenceEntity> {
-        val lesson = lessonService.findLesson(lessonId)
+        val lesson = lessonService.findLesson(lessonId).copy() // See the comment above the class
 
         val indexTransaction = IndexQueue(lesson).obtain().next()
         val getIndex = { indexTransaction.data }
@@ -71,7 +78,7 @@ class OccurrenceService {
 
     private final tailrec fun commitPast(lessonId: Int) {
         val occurrenceTransaction = getNextOccurrence(lessonId)
-        val lesson = lessonService.findLesson(lessonId)
+        val lesson = lessonService.findLesson(lessonId).copy() // See a comment above the class
 
         if(!LocalDateTime.of(occurrenceTransaction.data.date.toLocalDate(), lesson.time.toLocalTime()).isBefore(LocalDateTime.now())) return
 
@@ -79,12 +86,11 @@ class OccurrenceService {
         commitPast(lessonId)
     }
 
-    fun updateOccurrences() = lessonService.findAllLessons().forEach { commitPast(it.id) }
 
     fun peekOccurrences(lessonId: Int): Iterator<OccurrenceEntity> {
         commitPast(lessonId)
 
-        val lesson = lessonService.findLesson(lessonId)
+        val lesson = lessonService.findLesson(lessonId).copy() // See a comment above the class
 
         val indexQueue = IndexQueue(lesson).peek()
         val getIndex = { indexQueue.next().data }
@@ -102,8 +108,10 @@ class OccurrenceService {
             .iterator()
     }
 
+    fun updateOccurrences() = lessonService.findAllLessons().forEach { commitPast(it.id) }
+
     fun doesUserOccur(lessonId: Int, index: Int, userId: Int): Boolean {
-        val lesson = lessonService.findLesson(lessonId)
+        val lesson = lessonService.findLesson(lessonId).copy() // // See a comment above the class
 
         val indexQueue = IndexQueue(lesson).peek()
         var currentIndexTransaction = indexQueue.next()
@@ -121,8 +129,8 @@ class OccurrenceService {
         return userQueue.next().data.first == userId
     }
 
-    fun peekNextDates(lessonId: Int): Iterator<DateTransaction> {
-        val lesson = lessonService.findLesson(lessonId)
+    private fun peekNextDates(lessonId: Int): Iterator<DateTransaction> {
+        val lesson = lessonService.findLesson(lessonId).copy() // // See a comment above the class
         val indexQueue = IndexQueue(lesson).peek()
         val dateQueue: Iterator<DateTransaction> = dateQueueService.peek(lesson) { indexQueue.next().data }
 
