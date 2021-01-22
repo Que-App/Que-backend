@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import util.json
 import util.localDateTime
 
 
@@ -35,7 +36,9 @@ class DateQueueService {
         source
             .asSequence()
             .map {
+                log.debug("Change ${ change.json() } is executing")
                 if(it.data.first.toLocalDate() == change.date.toLocalDate() && it.data.first.toLocalTime() == change.time.toLocalTime()) {
+                    log.debug("Change ${ change.json() } is being applied")
                     it.commit()
                     source.next().onCommit { dispose(change) }
                 } else it
@@ -50,7 +53,9 @@ class DateQueueService {
         source
             .asSequence()
             .map {
+                log.debug("Change ${ change.json() } is executing")
                 if(it.data.second == change.lessonIndex) {
+                    log.debug("Change ${ change.json() } is being applied")
                     it.abort()
                     Transaction(localDateTime(change.date, change.time) to it.data.second) { dispose(change) }
                 }
@@ -74,11 +79,11 @@ class DateQueueService {
     // TODO: obtain and peek are very similar, should be able to do it without as much code duplication
     fun obtain(lesson: LessonEntity, getIndex: () -> Int): Iterator<DateTransaction> {
         val dateChanges = dateChangeRepository.findMostRecentForIndexes(lesson.id).map { change ->
-            compileDateChange(change) { dateChangeRepository.delete(it) }
+            compileDateChange(change) { dateChangeRepository.delete(it); log.debug("Change ${ it.json() } disposed.") }
         }
 
         val cancelChanges = cancelDateChangeRepository.findMostRecentForIndexes(lesson.id).map { change ->
-            compileCancelDateChange(change) { cancelDateChangeRepository.delete(it) }
+            compileCancelDateChange(change) { cancelDateChangeRepository.delete(it); log.debug("Change ${ it.json() } disposed.") }
         }
 
         val queue = DateQueue(lesson, getIndex).obtain()
@@ -88,11 +93,15 @@ class DateQueueService {
 
     fun peek(lesson: LessonEntity, getIndex: () -> Int): Iterator<DateTransaction> {
         val dateChanges = dateChangeRepository.findMostRecentForIndexes(lesson.id).map { change ->
-            compileDateChange(change) {}
+            compileDateChange(change) {
+                log.debug("Change ${ it.json() } is applied but in peek mode - not disposing")
+            }
         }
 
         val cancelChanges = cancelDateChangeRepository.findMostRecentForIndexes(lesson.id).map { change ->
-            compileCancelDateChange(change) {}
+            compileCancelDateChange(change) {
+                log.debug("Change ${ it.json() } is applied but in peek mode - not disposing")
+            }
         }
 
         val queue = DateQueue(lesson, getIndex).peek()

@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import util.json
 
 @Service
 class UserQueueService {
@@ -31,7 +32,9 @@ class UserQueueService {
         source
             .asSequence()
             .map {
+                log.debug("Change ${change.json()} is executing")
                 if(it.data.second == change.lessonIndex) {
+                    log.debug("Change ${change.json()} is being applied")
                     it.commit()
                     Transaction(change.userId to it.data.second) { dispose(change) }
                 } else it
@@ -51,7 +54,7 @@ class UserQueueService {
 
     fun obtain(lesson: LessonEntity, getIndex: () -> Int): Iterator<UserTransaction> {
         val changes = changeRepository.findMostRecentForIndexes(lesson.id).map { change ->
-            compileUserChange(change) { changeRepository.delete(it) }
+            compileUserChange(change) { changeRepository.delete(it); log.debug("Change ${ it.json() } disposed.") }
         }
 
         val queue = UserQueue(lesson, getIndex).obtain()
@@ -62,7 +65,7 @@ class UserQueueService {
 
     fun peek(lesson: LessonEntity, getIndex: () -> Int): Iterator<UserTransaction> {
         val changes = changeRepository.findMostRecentForIndexes(lesson.id).map { change ->
-            compileUserChange(change) {  }
+            compileUserChange(change) { log.debug("Change ${ it.json() } is applied but in peek mode - not disposing") }
         }
 
         val queue = UserQueue(lesson, getIndex).peek()

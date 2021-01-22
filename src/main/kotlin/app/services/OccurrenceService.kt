@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import util.copy
+import util.json
 import java.sql.Date
 import java.sql.Time
 import java.time.LocalDateTime
@@ -39,7 +40,7 @@ class OccurrenceService {
 
 
     companion object {
-        val log: Logger = LogManager.getLogger()
+        private val log: Logger = LogManager.getLogger()
     }
 
     fun findPrevious(amount: Int) = occurrenceRepository.findPrevious(amount)
@@ -47,6 +48,7 @@ class OccurrenceService {
     fun findPreviousForLesson(lessonId: Int, amount: Int): List<OccurrenceEntity> = occurrenceRepository.findPreviousForLesson(lessonId, amount)
 
     fun getNextOccurrence(lessonId: Int): Transaction<OccurrenceEntity> {
+        log.debug("Getting the next occurrence of lesson $lessonId")
         val lesson = lessonService.findLesson(lessonId).copy() // See the comment above the class
 
         val indexTransaction = IndexQueue(lesson).obtain().next()
@@ -63,6 +65,8 @@ class OccurrenceService {
             Time.valueOf(dateTransaction.data.first.toLocalTime()),
             userTransaction.data.first,
         )
+        log.debug("Determined next occurrence of lesson with id $lessonId: ${occurrence.json()}")
+
 
         return Transaction(occurrence) {
             dateTransaction.commit()
@@ -71,16 +75,19 @@ class OccurrenceService {
 
             lessonService.saveLesson(lesson)
             occurrenceRepository.save(occurrence)
+            log.debug("A new occurrence of lesson ${it.lessonId} has been committed: ${it.json()}")
         }
 
 
     }
 
     private final tailrec fun commitPast(lessonId: Int) {
+        log.debug("Committing past occurrences for lesson with id: $lessonId")
         val occurrenceTransaction = getNextOccurrence(lessonId)
         val lesson = lessonService.findLesson(lessonId).copy() // See a comment above the class
 
         if(!LocalDateTime.of(occurrenceTransaction.data.date.toLocalDate(), lesson.time.toLocalTime()).isBefore(LocalDateTime.now())) return
+        log.debug("Committing a new occurrence: ${occurrenceTransaction.data}")
 
         occurrenceTransaction.commit()
         commitPast(lessonId)
@@ -89,7 +96,7 @@ class OccurrenceService {
 
     fun peekOccurrences(lessonId: Int): Iterator<OccurrenceEntity> {
         commitPast(lessonId)
-
+        log.debug("Constructing peek occurrence iterator")
         val lesson = lessonService.findLesson(lessonId).copy() // See a comment above the class
 
         val indexQueue = IndexQueue(lesson).peek()
@@ -102,6 +109,7 @@ class OccurrenceService {
             lessonId
         ).asSequence()
             .map {
+                log.debug("Next occurrence is being peeked. Committing.")
                 it.commit()
                 it.data
             }
@@ -126,7 +134,9 @@ class OccurrenceService {
             userQueue.next().commit()
         }
 
-        return userQueue.next().data.first == userId
+        val result =  userQueue.next().data.first == userId
+        log.debug("Checked if user with id $userId occurs on the index $index of lesson with id $lessonId - $result")
+        return result
     }
 
     private fun peekNextDates(lessonId: Int): Iterator<DateTransaction> {
@@ -206,16 +216,23 @@ class OccurrenceService {
         private val cache: HashMap<Int, Pair<Iterator<DateTransaction>, MutableList<LocalDateTime>>> = HashMap()
 
         override fun mapDate(lessonId: Int, index: Int): LocalDateTime {
+            log.trace("Mapping lesson id $lessonId and index $index to date and time")
 
-            val cached = cache.computeIfAbsent(lessonId) { peekNextDates(lessonId) to ArrayList() }
+            val cached = cache.computeIfAbsent(lessonId) {
+                log.trace("Created cache for lesson id $lessonId")
+                peekNextDates(lessonId) to ArrayList()
+            }
 
             while(cached.second.size < index) {
+                log.trace("Cache size is ${cached.second.size}, requested index is $index, fetching more DateTime.")
                 val transaction = cached.first.next()
                 transaction.commit()
                 cached.second.add(transaction.data.first)
             }
 
-            return cached.second[index-1]
+            return cached.second[index-1].also {
+                log.debug("Mapped lesson id $lessonId and index $index to $it")
+            }
 
         }
     }

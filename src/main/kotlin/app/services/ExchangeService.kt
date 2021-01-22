@@ -7,12 +7,12 @@ import app.data.repositories.ExchangeRequestRepository
 import app.data.repositories.ExchangesRepository
 import app.services.exceptions.EntityNotFoundException
 import app.services.exceptions.InvalidExchangeRequestException
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import util.json
 import java.sql.Timestamp
 
 @Service
@@ -64,7 +64,7 @@ class ExchangeService {
 
     @PreAuthorize("request.toUserId == userService.currentlyAuthenticatedUser.id")
     fun declineRequest(request: ExchangeRequestEntity): Unit {
-        log.debug("Request ${ObjectMapper().writeValueAsString(request)} has been declined.")
+        log.debug("Request ${request.json()} has been declined.")
 
         request.status = ExchangeRequestEntity.Status.DECLINED
         request.resolvementTime = Timestamp(System.currentTimeMillis())
@@ -98,7 +98,7 @@ class ExchangeService {
         if(!occurrenceService.doesUserOccur(request.toLessonId, request.toIndex, request.toUserId))
             handleInvalidRequest(request, "Request target does not occur as specified in request")
 
-        log.debug("Request ${ObjectMapper().writeValueAsString(request)} passed validation")
+        log.debug("Request ${request.json()} passed validation")
     }
 
     private fun applyRequest(request: ExchangeRequestEntity) {
@@ -129,7 +129,7 @@ class ExchangeService {
     @PreAuthorize("request.toUserId == userService.currentlyAuthenticatedUser.id")
     fun handleInvalidRequest(request: ExchangeRequestEntity, message: String): Nothing {
             request.apply {
-                log.debug("Exchange request with id $id was invalid. Error message: $message." + "Request: ${ObjectMapper().writeValueAsString(request)}")
+                log.debug("Exchange request with id $id was invalid. Error message: $message." + "Request: ${request.json()}")
             }
 
         request.status = ExchangeRequestEntity.Status.INVALID
