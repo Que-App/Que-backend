@@ -4,14 +4,17 @@ import app.api.v1.MappingComponent
 import app.api.v1.pojos.ExchangeRequestPojo
 import app.api.v1.pojos.mapping.mapToEntity
 import app.api.v1.pojos.mapping.mapToExchangeRequestPojos
+import app.api.v1.validation.MaxIndex
 import app.services.ExchangeService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import util.ok
 import javax.validation.Valid
 
 @CrossOrigin
 @RestController
+@Validated
 class ExchangeController {
 
     @Autowired
@@ -27,7 +30,7 @@ class ExchangeController {
     fun getExchangeRequestsByUser() = exchangeService.findRequestByUser().mapToExchangeRequestPojos(mappingComponent)
 
     @PostMapping("/api/v1/exchanges/requests/submit")
-    fun submitExchangeRequest(@Valid @RequestBody request: ExchangeRequestPojo) =
+    fun submitExchangeRequest(@Valid @RequestBody @MaxIndex request: ExchangeRequestPojo) =
         exchangeService.saveRequest(request.mapToEntity())
             .ok()
 

@@ -24,6 +24,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+import javax.validation.ConstraintViolationException
 
 @ControllerAdvice
 class ErrorHandler : ResponseEntityExceptionHandler() {
@@ -160,6 +161,21 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
             "If you believe the request was valid, pleas contact the system administrator as soon as possible"
         )
             .createResponseEntity()
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolationException(ex: ConstraintViolationException): ResponseEntity<Any> {
+        val subErrors = ex.constraintViolations.map { ApiSubError(
+            "Invalid value: ${it.invalidValue} - ${it.message}",
+            "Check the rejected value against error",
+        )}
+
+        return ApiError(
+            HttpStatus.BAD_REQUEST,
+            "Validation failed",
+            "Look into the rejected values",
+            subErrors
+        ).createResponseEntity()
+    }
 
     @ExceptionHandler(Exception::class)
     fun handleGenericException(ex: java.lang.Exception): ResponseEntity<Any> {

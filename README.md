@@ -83,12 +83,11 @@ Returns access token if username and password are valid and account is active
 **Method:** `POST`  
 **Body:**
 - `oldPassword`: `String`
-- `newPassword`: `String`
+- `newPassword`: `String` - must be size between 3 and 30 characters
 
 **Response:** `200 OK` status or `401 Unauthorized` if supplied details are incorrect
 
 ## Subjects
-
 <a name="SubjectEntity"></a>
 ### Subject Entity
 - `id`: `Integer`
@@ -131,7 +130,9 @@ Returns access token if username and password are valid and account is active
 **Response:** An Array of `Integers` representing the IDs of users
 
 ## Occurrences
-
+Occurrences are index, date and user bound together - basically the 
+computed queue. **When requested amount of occurrences is to be specified in 
+request, it can be not more than 30.**
 <a name="OccurrenceEntity"></a>
 ### Occurrence Entity
 - `lessonId`: `Integer`
@@ -215,6 +216,7 @@ at the time of responding to the request, it may change.
 **Response:** `200 OK`
 
 ### Submit a new exchange request
+**You can submit an exchange request only up to 30 indexes ahead**  
 **Request:** `/exchanges/requests/submit`  
 **Method:** `POST`  
 **Body:**  
