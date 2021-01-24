@@ -75,6 +75,7 @@ tasks.register("buildRelease", Zip) {
     from "$buildDir/libs"
     from "$rootDir/README.md"
     from "$rootDir/schemas/schema.sql"
+    from "$rootDir/LICENSE"
 }
 
 compileKotlin {

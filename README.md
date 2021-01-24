@@ -19,6 +19,9 @@ Provided the proof-of-concept implementation will pass the tests and meet our ex
 seek to further develop and expand this idea which, we hope, will result in publicly available
 universal solution.
 
+**Please note that i am aware of the importance of automatic testing and although there are no tests 
+currently, they will be definitely implemented in future.**
+
 # API
 All API post responses and requests have a content Method of `application/json` and encoding UTF-8.
 The format of the string date is "yyyy-mm-dd", format of the string time is "hh:mm:ss" unless specified 
@@ -65,7 +68,7 @@ The scheme consists of:
 }
 ```
 ## Login  
-Returns access token if username and password are valid and account is active  
+Returns access token if username and password are valid and account is active.  
 **Request:** `/auth`  
 **Method:** `POST`  
 **Body:**
@@ -108,11 +111,11 @@ Returns access token if username and password are valid and account is active
 <a name="LessonEntity"></a>
 ### Lesson Entity
 - `id`: `Integer`
-- `lessonIndex`: `Integer` - Determines the next occurrence will be the n-th occurrence of this lesson
+- `lessonIndex`: `Integer` - Determines the next occurrence will be the n-th occurrence of this lesson.
 - `subjectId`: `Integer`
-- `nextDate`: `String` - Date on which the next occurrence of this lesson should take place, in format
-- `time`: `String` - A time of the next occurrence, in "hh:mm:ss" format
-- `recurrenceInterval`: `Integer` - Determines every how many days should an occurrence take place
+- `nextDate`: `String` - Date on which the next occurrence of this lesson should take place.
+- `time`: `String` - A time of the next occurrence.
+- `recurrenceInterval`: `Integer` - Determines every how many days should an occurrence take place.
 
 ### Get lesson
 **Request:** `/lessons/{lesson_id}`  
@@ -127,7 +130,7 @@ Returns access token if username and password are valid and account is active
 ### Get Users in lesson
 **Request:** `/lessons/{lesson_id}/users`  
 **Method:** `GET`  
-**Response:** An Array of `Integers` representing the IDs of users
+**Response:** An Array of `Integers` representing the IDs of users.
 
 ## Occurrences
 Occurrences are index, date and user bound together - basically the 
@@ -143,7 +146,7 @@ request, it can be not more than 30.**
 - `username`: `String`
 
 ### Update occurrences
-Removes old occurrences from queue and moves them to the log  
+Removes old occurrences from queue and moves them to the log.  
 **Request:** `/occurrences/update`  
 **Method:** `GET`  
 **Response:** `200 OK`
@@ -172,16 +175,16 @@ both date and time set in the past.
 - `id`: `Integer`
 - `fromUserId`: `Integer`
 - `fromLessonId`: `Integer`
-- `fromIndex`: `Integer` - an index of the occurrence for which the sender wants to swap for
+- `fromIndex`: `Integer` - an index of the occurrence for which the sender wants to swap for.
 - `toUserId`: `Integer`
 - `toLessonId`: `Integer`
-- `toIndex`: `Integer` - an index of the occurrence the sender wants to take instead
+- `toIndex`: `Integer` - an index of the occurrence the sender wants to take instead.
 - `status`: `String` (Enum) `PENDING` when the target user has yet undertaken no action regarding this
 request, `ACCEPTED` if the target user has accepted the exchange, `DECLINED` if the target user has 
 declined the exchange or `INVALID` if the target user has tried to accept the exchange, but the request
 was invalid at that time. Once the status changes from `PENDING`, it can not change again.
 - `resolvementTime`: `Long` - Point in time in which the target user has taken action regarding this
-request that resulted in `status` change
+request that resulted in `status` change.
 - `fromUsername`: `String`
 - `tuUsername`: `String`
 - `fromDate`: `String` - Result of assigning the date to the occurrence with index "`fromIndex`", computed
@@ -216,14 +219,14 @@ at the time of responding to the request, it may change.
 **Response:** `200 OK`
 
 ### Submit a new exchange request
-**You can submit an exchange request only up to 30 indexes ahead**  
+**You can submit an exchange request only up to 30 indexes ahead.**  
 **Request:** `/exchanges/requests/submit`  
 **Method:** `POST`  
 **Body:**  
 - `fromUserId`: `Integer`
 - `fromLessonId`: `Integer`
-- `fromIndex`: `Integer` - an index of the occurrence for which the sender wants to swap for
+- `fromIndex`: `Integer` - an index of the occurrence for which the sender wants to swap for.
 - `toUserId`: `Integer`
 - `toLessonId`: `Integer`
-- `toIndex`: `Integer` - an index of the occurrence the sender wants to take instead
+- `toIndex`: `Integer` - an index of the occurrence the sender wants to take instead.  
 **Response:** `200 OK`
