@@ -35,7 +35,6 @@ class ExchangeRequestPojo(
     @field:Min(0, message = "toIndex must be positive")
     var toIndex: Int?,
 
-    @field:NotNull(message = "Request status must not be null")
     var status: ExchangeRequestEntity.Status? = ExchangeRequestEntity.Status.PENDING,
 
     var resolvementTime: Long?,

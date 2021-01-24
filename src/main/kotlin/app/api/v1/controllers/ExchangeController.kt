@@ -20,15 +20,8 @@ class ExchangeController {
     @Autowired
     private lateinit var mappingComponent: MappingComponent
 
-    @GetMapping("/api/v1/exchanges")
-    fun findAllExchanges() = exchangeService.findAllExchanges()
-
-    @GetMapping("/api/v1/exchanges/{userId}") //TODO: Shouldn't the id be of currently authenticated user?
-    fun findExchangesForUser(@PathVariable("userId") id: Int) =
-        exchangeService.findExchangesForUser(id)
-
     @GetMapping("/api/v1/exchanges/requests/to")
-    fun getExchangesForUser() = exchangeService.findRequestsToUser().mapToExchangeRequestPojos(mappingComponent)
+    fun getExchangeRequestsToUser() = exchangeService.findRequestsToUser().mapToExchangeRequestPojos(mappingComponent)
 
     @GetMapping("/api/v1/exchanges/requests/from")
     fun getExchangeRequestsByUser() = exchangeService.findRequestByUser().mapToExchangeRequestPojos(mappingComponent)
