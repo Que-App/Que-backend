@@ -65,6 +65,18 @@ tasks.bootRun.configure {
     systemProperty("spring.profiles.active", "dev")
 }
 
+tasks.register("buildRelease", Zip) {
+    group = "build"
+    dependsOn ":bootJar"
+
+    archiveFileName = project.name + "-" + gitVersion() + ".zip"
+    destinationDirectory = file("$buildDir/release")
+
+    from "$buildDir/libs"
+    from "$rootDir/README.md"
+    from "$rootDir/schemas/schema.sql"
+}
+
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
