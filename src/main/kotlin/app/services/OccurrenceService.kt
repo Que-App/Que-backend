@@ -140,7 +140,7 @@ class OccurrenceService {
     }
 
     private fun peekNextDates(lessonId: Int): Iterator<DateTransaction> {
-        val lesson = lessonService.findLesson(lessonId).copy() // // See a comment above the class
+        val lesson = lessonService.findLesson(lessonId).copy() // See a comment above the class
         val indexQueue = IndexQueue(lesson).peek()
         val dateQueue: Iterator<DateTransaction> = dateQueueService.peek(lesson) { indexQueue.next().data }
 
@@ -213,27 +213,39 @@ class OccurrenceService {
 
     private inner class CachingIndexToDateTimeMapper : IndexToDateTimeMapper {
 
-        private val cache: HashMap<Int, Pair<Iterator<DateTransaction>, MutableList<LocalDateTime>>> = HashMap()
+        private val cache: HashMap<Int, LessonCache> = HashMap()
 
         override fun mapDate(lessonId: Int, index: Int): LocalDateTime {
             log.trace("Mapping lesson id $lessonId and index $index to date and time")
 
-            val cached = cache.computeIfAbsent(lessonId) {
-                log.trace("Created cache for lesson id $lessonId")
-                peekNextDates(lessonId) to ArrayList()
+            val lessonCache = cache.computeIfAbsent(lessonId) {
+                log.trace("Creating cache for lesson id $lessonId")
+                LessonCache(
+                    peekNextDates(lessonId),
+                    ArrayList()
+                )
             }
 
-            while(cached.second.size < index) {
-                log.trace("Cache size is ${cached.second.size}, requested index is $index, fetching more DateTime.")
-                val transaction = cached.first.next()
+            while(lessonCache.dates.lastOrNull()?.second?: 0 < index) {
+                log.trace("Current highest index for lessonId $lessonId is ${ lessonCache.dates.lastOrNull()?.second?: 0 }, required" +
+                        "index is $index, fetching more dates.")
+                val transaction = lessonCache.dateIterator.next()
+                log.trace("Computed next date: ${transaction.data.first}")
                 transaction.commit()
-                cached.second.add(transaction.data.first)
+                lessonCache.dates.add(transaction.data)
             }
 
-            return cached.second[index-1].also {
-                log.debug("Mapped lesson id $lessonId and index $index to $it")
-            }
 
+            val mapped =  lessonCache.dates.getOrNull(index-lessonCache.dates.first().second)?.first
+                ?: occurrenceRepository.findPrevious(lessonId, index).run { LocalDateTime.of(date.toLocalDate(), time.toLocalTime()) }
+
+            log.debug("Mapped lesson id $lessonId and index $index to $mapped")
+            return mapped
         }
+
+        private inner class LessonCache(
+            val dateIterator: Iterator<DateTransaction>,
+            val dates: MutableList<Pair<LocalDateTime, Int>>,
+        )
     }
 }

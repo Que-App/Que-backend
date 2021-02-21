@@ -11,4 +11,7 @@ interface OccurrenceRepository : CrudRepository<OccurrenceEntity, Int> {
 
     @Query("SELECT * FROM occurrence_log ORDER BY date DESC, time DESC LIMIT :amount", nativeQuery = true)
     fun findPrevious(amount: Int): List<OccurrenceEntity>
+
+    @Query("SELECT * FROM occurrence_log WHERE lesson_id=:lessonId and lesson_index=:lessonIndex", nativeQuery = true)
+    fun findPrevious(lessonId: Int, lessonIndex: Int): OccurrenceEntity
 }

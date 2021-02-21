@@ -155,10 +155,10 @@ CREATE TABLE `occurrence_log` (
   `time` time NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`occurrence_id`),
-  KEY `lessonid_index` (`lesson_id`),
   KEY `userid_index` (`user_id`),
   KEY `date_time_index` (`date`,`time`),
-  CONSTRAINT `ol_lessonid_to_lessons_id` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`lesson_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  KEY `lesson_id_lesson_index_index` (`lesson_id`,`lesson_index`),
+  CONSTRAINT `ol_lesson_id_to_lessons_lesson_id` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`lesson_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `ol_userid_to_users_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -291,4 +291,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-22  9:37:07
+-- Dump completed on 2021-02-21 15:18:45
