@@ -1,3 +1,7 @@
+# This is a demo version of the project
+**Some changes have been made to adjust it for demonstration purposes. API might differ from the main production version**
+**If this is not what you are looking for, change the branch.**
+
 # About
 
 **Que is a tool that allows for even, fair and organized distribution of cyclic tasks among the members of a group.**
