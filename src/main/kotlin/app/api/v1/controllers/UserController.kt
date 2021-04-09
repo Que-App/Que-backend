@@ -18,4 +18,9 @@ class UserController {
 
     @GetMapping("/api/v1/user/{userId}")
     fun findUserById(@PathVariable("userId") id: Int): UserPojo = userService.findUserById(id).mapToPojo()
+
+    // TODO: Remove. This is only for demo purposes
+    @GetMapping("/api/demo/users")
+    fun getAllUsers(): List<String> =
+        userService.findAllUsers().map { it.username!! }
 }

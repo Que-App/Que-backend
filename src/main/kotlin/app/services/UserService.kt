@@ -1,5 +1,7 @@
 package app.services
 
+import app.api.v1.pojos.UserPojo
+import app.api.v1.pojos.mapping.mapToPojo
 import app.data.entities.UserEntity
 import app.data.repositories.UserRepository
 import app.security.QueueUserDetails
@@ -88,5 +90,8 @@ class UserService : UserDetailsService  {
 
 
     fun UserEntity.removeCredentials() = apply { password = "" }
+
+    // TODO: Remove. This is only for demo purposes
+    fun findAllUsers(): List<UserPojo> = userRepository.findAll().map { it.mapToPojo() }
 
 }

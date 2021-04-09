@@ -1,5 +1,5 @@
 # This is a demo version of the project
-**Some changes have been made to adjust it for demonstration purposes. API might differ from the main production version**
+**Some changes have been made to adjust it for demonstration purposes. API might differ from the main production version**  
 **If this is not what you are looking for, change the branch.**
 
 # About
@@ -233,4 +233,17 @@ at the time of responding to the request, it may change.
 - `toUserId`: `Integer`
 - `toLessonId`: `Integer`
 - `toIndex`: `Integer` - an index of the occurrence the sender wants to take instead.  
+**Response:** `200 OK`
+  
+
+# DEMO-specific API
+
+**These are prefixed with `/api/demo`**
+
+## Users
+
+### Get all usernames
+**Request:** `/users`  
+**Method:** `GET`  
+**Body:** A list of `String` representing usernames  
 **Response:** `200 OK`
