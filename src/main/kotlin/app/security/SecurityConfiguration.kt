@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -44,6 +45,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
         http.authorizeRequests()
             .antMatchers("/api/v1/auth").permitAll()
+            .antMatchers("/api/demo/*").permitAll()
             .anyRequest().authenticated()
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -51,7 +53,13 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     @Bean
     override fun authenticationManagerBean(): AuthenticationManager {
-        return super.authenticationManagerBean()
+        return AuthenticationManager {
+            object : Authentication by it {
+                override fun getPrincipal(): Any = userDetailsService().loadUserByUsername(name)
+
+                override fun isAuthenticated(): Boolean = true
+            }
+        }
     }
 
 
