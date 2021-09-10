@@ -7,13 +7,17 @@ import app.data.repositories.ExchangeRequestRepository
 import app.data.repositories.ExchangesRepository
 import app.services.exceptions.EntityNotFoundException
 import app.services.exceptions.InvalidExchangeRequestException
+import app.services.models.ExchangeRequestCreatedEvent
+import app.services.models.ExchangeRequestStatusChangeEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import util.json
 import java.sql.Timestamp
+import java.time.LocalDateTime
 
 @Service
 class ExchangeService {
@@ -40,14 +44,25 @@ class ExchangeService {
     @Autowired
     private lateinit var userQueueService: UserQueueService
 
+    @Autowired
+    private lateinit var messagingTemplate: RabbitTemplate
+
 
 
     fun findAllExchanges() = exchangeRepository.findAll()
 
     fun findExchangesForUser(id: Int) = exchangeRepository.findChangesForUser(id)
 
-    fun saveRequest(request: ExchangeRequestEntity) =
-        exchangeRequestRepository.save(request)
+    fun saveRequest(r: ExchangeRequestEntity) {
+        exchangeRequestRepository.save(r)
+
+        messagingTemplate.convertAndSend("request-send", ExchangeRequestCreatedEvent(
+            r.id,
+            r.fromUserId, r.fromLessonId, r.fromIndex,
+            r.toUserId, r.toLessonId, r.toIndex,
+            LocalDateTime.now()
+        ))
+    }
 
     fun findRequestById(id: Int) =
         exchangeRequestRepository
@@ -69,6 +84,12 @@ class ExchangeService {
         request.status = ExchangeRequestEntity.Status.DECLINED
         request.resolvementTime = Timestamp(System.currentTimeMillis())
         saveRequest(request)
+
+        messagingTemplate.convertAndSend("request-state-change", ExchangeRequestStatusChangeEvent(
+            LocalDateTime.now(),
+            request.id,
+            ExchangeRequestStatusChangeEvent.Status.valueOf(request.status.toString()),
+        ))
     }
 
     fun acceptRequest(id: Int): Unit = acceptRequest(findRequestById(id))
@@ -124,6 +145,8 @@ class ExchangeService {
         request.status = ExchangeRequestEntity.Status.ACCEPTED
         request.resolvementTime = Timestamp(System.currentTimeMillis())
         saveRequest(request)
+
+        sendRequestStatus(request)
     }
 
     @PreAuthorize("request.toUserId == userService.currentlyAuthenticatedUser.id")
@@ -136,7 +159,16 @@ class ExchangeService {
         request.resolvementTime = Timestamp(System.currentTimeMillis())
         saveRequest(request)
 
+        sendRequestStatus(request)
+
         throw InvalidExchangeRequestException(message)
     }
+
+    private fun sendRequestStatus(request: ExchangeRequestEntity) =
+        messagingTemplate.convertAndSend("request-state-change", ExchangeRequestStatusChangeEvent(
+            LocalDateTime.now(),
+            request.id,
+            ExchangeRequestStatusChangeEvent.Status.valueOf(request.status.toString()),
+        ))
 
 }
