@@ -1,5 +1,6 @@
 package app.security
 
+import app.data.entities.UserEntity
 import app.services.UserService
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
@@ -38,16 +39,18 @@ class JWTAuthenticationFilter(private val usersService: UserService, private val
 
     private fun authenticateWithToken(token: String, request: HttpServletRequest) = try {
 
-        val userid: Int = Jwts
+        val userid: Int? = Jwts
             .parserBuilder()
             .configure(jwtConf)
             .build()
             .parseClaimsJws(token)
             .body
             .subject
-            .toInt()
+            ?.toInt()
 
-        val userDetails: QueueUserDetails = usersService.findUserDetailsById(userid).removeCredentials()
+        val userDetails: QueueUserDetails =
+            if(userid != null) usersService.findUserDetailsById(userid).removeCredentials()
+            else QueueUserDetails(UserEntity(-1, "SERVICE", "", true, emptyList()))
 
         if(!userDetails.isEnabled)
             throw DisabledException("User with id ${userDetails.id} failed token authentication due to account being disabled")
