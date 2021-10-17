@@ -197,6 +197,11 @@ at the time of responding to the request, it may change.
   at the time of responding to the request, it may change.
 - `fromSubjectName`: `String`
 - `toSubjectName`: `String`
+
+### Get request by request id
+**Request:** `/api/v1/exchanges/requests/{request_id}`  
+**Method:** `GET`  
+**Response:** [Exchange request entity](#ExchangeRequestEntity)
   
 ### Get requests targeted to user
 **Request:** `/exchanges/requests/to`  

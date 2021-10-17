@@ -23,6 +23,9 @@ class ExchangeController {
     @Autowired
     private lateinit var mappingComponent: MappingComponent
 
+    @GetMapping("/api/v1/exchanges/requests/{requestId}")
+    fun getRequestById(@PathVariable("requestId") id: Int) = exchangeService.findRequestById(id)
+
     @GetMapping("/api/v1/exchanges/requests/to")
     fun getExchangeRequestsToUser() = exchangeService.findRequestsToUser().mapToExchangeRequestPojos(mappingComponent)
 

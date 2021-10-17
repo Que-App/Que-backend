@@ -64,7 +64,7 @@ class ExchangeService {
         ))
     }
 
-    fun findRequestById(id: Int) =
+    fun findRequestById(id: Int): ExchangeRequestEntity =
         exchangeRequestRepository
             .findById(id)
             .orElseThrow { throw EntityNotFoundException("exchange request") }
