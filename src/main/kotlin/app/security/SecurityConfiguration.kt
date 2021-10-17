@@ -1,6 +1,9 @@
 package app.security
 
 import app.services.UserService
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.AuthenticationManager
@@ -12,9 +15,14 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import java.security.Security
 
 @EnableWebSecurity
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
+
+    companion object {
+        private val log: Logger = LogManager.getLogger()
+    }
 
     @Autowired
     private lateinit var jwtConf: JWTConfiguration
@@ -24,6 +32,10 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     @Autowired
     private lateinit var secureUsersService: UserService
+
+    init {
+        Security.addProvider(BouncyCastleProvider())
+    }
 
     override fun configure(auth: AuthenticationManagerBuilder?) {
         auth?.userDetailsService(secureUsersService)
