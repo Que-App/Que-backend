@@ -2,60 +2,74 @@ package app.security
 
 import io.jsonwebtoken.JwtBuilder
 import io.jsonwebtoken.JwtParserBuilder
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.io.Decoders
-import io.jsonwebtoken.security.Keys
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
 import java.util.*
-import javax.crypto.SecretKey
+import javax.annotation.PostConstruct
 
 @Component
 class JWTConfiguration {
 
     companion object {
         const val DEFAULT_VALIDITY: Long = 900000
+
+        private val log: Logger = LogManager.getLogger()
     }
 
-    @Value("\${queue.api.auth.token.secret:}")
-    private lateinit var secretValue: String
+    @Value("\${queue.api.auth.token.key.private.pkcs8}")
+    private lateinit var privateKeyValue: String
 
-    private var _key: SecretKey? = null
+    final lateinit var privateKey: PrivateKey
+        private set
 
-    val key: SecretKey
-        get() {
-            if(_key == null) initKey()
-            return _key!!
-        }
+    @Value("\${queue.api.auth.token.key.public.x509}")
+    private lateinit var publicKeyValue: String
 
-    @Value("\${queue.api.auth.token.issuer}")
+    final lateinit var publicKey: PublicKey
+        private set
+
+    @Value("\${queue.api.auth.token.issuer:}")
     lateinit var issuer: String
 
-    @Value("\${queue.api.auth.token.audience}")
+    @Value("\${queue.api.auth.token.audience:}")
     lateinit var audience: String
 
     @Value("\${queue.api.auth.token.validity:}")
     private lateinit var validityValue: String
 
-    private var _validity: Long? = null
+    final var validity: Long = DEFAULT_VALIDITY
+        private set
 
-    val validity: Long
-        get() {
-            if(_validity == null) initValidity()
-            return _validity!!
+
+    @PostConstruct
+    private fun init() {
+        if(audience.isBlank())
+            throw IllegalStateException("Configuration error: queue.api.auth.token.audience is not set")
+        if(issuer.isBlank())
+            throw IllegalStateException("Configuration error: queue.api.auth.token.issuer is not set")
+
+        if(validityValue.isNotEmpty()) try {
+            validity = validityValue.toLong()
+        } catch (ignored: Exception) {
+            log.warn("Invalid token validity provided, falling back to default: $DEFAULT_VALIDITY")
         }
 
-    private fun initKey() =
-        if (secretValue.isEmpty()) _key = Keys.secretKeyFor(SignatureAlgorithm.HS512)
-        else _key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretValue))
+        val keyFactory  = KeyFactory.getInstance("EC")
 
-    private fun initValidity() {
-        if(validityValue.isNotEmpty()) try {
-            _validity = validityValue.toLong()
-            return
-        } catch (ignored: Exception) {}
+        val privateKeyPKCS8 = Base64.getDecoder().decode(privateKeyValue)
+        val privateKeySpec = PKCS8EncodedKeySpec(privateKeyPKCS8)
+        privateKey = keyFactory.generatePrivate(privateKeySpec)
 
-        _validity = DEFAULT_VALIDITY
+        val publicKeyX509 = Base64.getDecoder().decode(publicKeyValue)
+        val publicKeySpec = X509EncodedKeySpec(publicKeyX509)
+        publicKey = keyFactory.generatePublic(publicKeySpec)
     }
 
 }
@@ -64,14 +78,14 @@ fun JwtBuilder.configure(conf: JWTConfiguration): JwtBuilder {
     setIssuer(conf.issuer)
     setAudience(conf.audience)
     setExpiration(Date(Date().time + conf.validity))
-    signWith(conf.key)
+    signWith(conf.privateKey)
     return this
 }
 
 fun JwtParserBuilder.configure(conf: JWTConfiguration): JwtParserBuilder {
     requireIssuer(conf.issuer)
     requireAudience(conf.audience)
-    setSigningKey(conf.key)
+    setSigningKey(conf.publicKey)
     return this
 }
 
