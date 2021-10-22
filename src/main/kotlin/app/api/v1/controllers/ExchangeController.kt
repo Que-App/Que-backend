@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*
 import util.ok
 import javax.validation.Valid
 
-@CrossOrigin
 @RestController
 @Validated
 class ExchangeController {

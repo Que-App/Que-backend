@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController
 import util.ok
 import javax.validation.Valid
 
-@CrossOrigin
 @RestController
 class AccountController {
 
