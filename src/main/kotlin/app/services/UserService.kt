@@ -49,6 +49,8 @@ class UserService : UserDetailsService  {
         .orElseThrow { throw userNotFoundException }
         .run { QueueUserDetails(this) }
 
+    fun findAllUsers(): List<UserEntity> = userRepository.findAll().map { it.removeCredentials() }
+
     fun findUserById(id: Int): UserEntity = userRepository
         .findById(id)
         .orElseThrow { throw userNotFoundException }
