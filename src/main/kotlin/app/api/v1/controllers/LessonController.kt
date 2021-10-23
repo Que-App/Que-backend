@@ -31,4 +31,7 @@ class LessonController {
     @GetMapping("/api/v1/lessons/{lessonId}/users")
     fun getUsersFromLesson(@PathVariable("lessonId") lessonId: Int) =
         lessonService.findLesson(lessonId).users
+
+    @GetMapping("/api/v1/lessons")
+    fun findAllLessons() = lessonService.findAllLessons().mapToLessonPojos()
 }
