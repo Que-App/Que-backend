@@ -81,6 +81,7 @@ class OccurrenceService {
 
     }
 
+    @Synchronized
     private final tailrec fun commitPast(lessonId: Int) {
         log.debug("Committing past occurrences for lesson with id: $lessonId")
         val occurrenceTransaction = getNextOccurrence(lessonId)
